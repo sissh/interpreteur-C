@@ -10,27 +10,28 @@ public class Fonctions {
 	}
 
 	
-	public static int execFonction(String nomFonction, Object [] arguments) {	
+	public static String execFonction(String nomFonction, Object [] arguments) {	
 		switch(nomFonction) {
 			case "pow":
 				if (arguments[0] instanceof Integer && arguments[1] instanceof Integer) {
 					pow(arguments);
+					return messageErreur(0);
 				}
 				
 				else if (arguments[0] instanceof Integer && !(arguments[1] instanceof Integer) ) {
-					messageErreur(1);
+					return messageErreur(1);
 				}
 				
 				else if (!(arguments[0]instanceof Integer) && arguments[1] instanceof Integer) {
-					messageErreur(2);
+					return messageErreur(2);
 				}
 				
-			default: messageErreur(42);
+			default: return messageErreur(42);
 		}
-		return 0;
+
 	}
 	
-	public static String messageErreur(int codeErreur) {
+	private static String messageErreur(int codeErreur) {
 		switch(codeErreur) {
 			case 0: return "Aucun problème rencontré.";
 			case 1: return "Erreur au second argument : type Int attendu.";

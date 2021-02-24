@@ -55,7 +55,40 @@ public class Fonctions {
 	}
 	
 	public static String print(Object [] arguments) {
-		return arguments[0].toString();
+		String resultat = arguments[0].toString();
+		int variable = 1;
+		int i = 0;
+
+		while (i < resultat.length()) {
+			if (resultat.charAt(i) == '%') {
+				
+				if (i <= resultat.length() - 2 && testVariablePrint(resultat.charAt(i+1), resultat.charAt(i+2)) ) {
+					resultat = resultat.substring(0, i-1) + arguments[variable].toString() + resultat.substring(i+1);
+					variable += 1;
+					
+				}
+				
+				else if (i <= resultat.length() - 1 && testVariablePrint(resultat.charAt(i+1), ' ')) {
+					resultat = resultat.substring(0, i) + arguments[variable].toString();
+				}
+				
+			}
+			
+			i++;
+		}
+		
+		return resultat;
 	}
+	
+	private static boolean testVariablePrint (char ch1, char ch2) {
+		if (ch2 == ' ') {
+			switch (ch1) {
+				case 'd','s','c','f','n':return true;
+				default:return false;
+			}
+		}
+		return false;
+	}
+	
 
 }

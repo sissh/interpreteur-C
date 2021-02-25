@@ -59,11 +59,11 @@ public class Fonctions {
 		int variable = 1;
 		int i = 0;
 
-		while (i < resultat.length()) {
+		while (i < resultat.length()-1) {
 			if (resultat.charAt(i) == '%') {
 				
-				if (i <= resultat.length() - 2 && testVariablePrint(resultat.charAt(i+1), resultat.charAt(i+2)) ) {
-					resultat = resultat.substring(0, i-1) + arguments[variable].toString() + resultat.substring(i+1);
+				if (i < resultat.length() - 2 && testVariablePrint(resultat.charAt(i+1), resultat.charAt(i+2)) ) {
+					resultat = resultat.substring(0, i) + arguments[variable].toString() + resultat.substring(i+2);
 					variable += 1;
 					
 				}

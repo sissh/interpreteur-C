@@ -82,7 +82,6 @@ public class Fonctions {
 	
 	private static boolean testVariablePrint (char ch1, char ch2) {
 		if (ch2 == ' ') {
-			System.out.println("ça m'a l'air de ne pas trop fonctionner ton truc...");
 			switch (ch1) {
 				case 'd','s','c','f','n':return true;
 				default:return false;

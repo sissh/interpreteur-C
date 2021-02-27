@@ -33,14 +33,14 @@ public class Fonctions {
 	
 	private static String messageErreur(int codeErreur) {
 		switch(codeErreur) {
-			case 0: return "Aucun problème rencontré.";
+			case 0: return "Aucun problï¿½me rencontrï¿½.";
 			case 1: return "Erreur au second argument : type Int attendu.";
 			case 2: return "Erreur au premier argument : type Int attendu.";
 			
 			
 			
 			case 42: return "Fonction non reconnue.";
-			default: return "Ce message n'est pas censé apparaître.";
+			default: return "Ce message n'est pas censï¿½ apparaï¿½tre.";
 		}
 	}
 	
@@ -82,6 +82,7 @@ public class Fonctions {
 	
 	private static boolean testVariablePrint (char ch1, char ch2) {
 		if (ch2 == ' ') {
+			System.out.println("Ã§a m'a l'air de ne pas trop fonctionner ton truc...");
 			switch (ch1) {
 				case 'd','s','c','f','n':return true;
 				default:return false;

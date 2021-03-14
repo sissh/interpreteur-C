@@ -20,32 +20,61 @@ public class Parser implements ListeMots{
 	
 	public void makeTokens() {
 		String parse = "";
-		for (int i=0; i < this.chaine.length() ; i++) {
-			char chr = this.chaine.charAt(i);
+		for (int i=0; i < chaine.length() ; i++) {
+			char chr = chaine.charAt(i);
 			if (chr==' '){// si parse contient un objet, l'ajouter. Si c'est des espaces en trop, supprimer.
 				if (parse.equals(" ") || parse.equals("")) {
 					parse="";
 					continue;
 				}
 				else {
-					this.setTokens.add(differentiation(parse));
+					setTokens.add(differentiation(parse));
 					parse="";
 					continue;
 				}
 				
 			}
 			else if(isToken(chr)) {
-				this.setTokens.add(differentiation(parse));
-				this.setTokens.add(differentiation(chr));
+				setTokens.add(differentiation(parse));
+				setTokens.add(differentiation(chr));
 				parse="";
 				continue;
 				}
 			parse+=chr;
 		}
-		for (int i=0; i<this.setTokens.size(); i++) {//Supprime des tokens vide en trop
-			if (this.setTokens.get(i).getNom().equals(""))
-				this.setTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
+		int i=0;
+		while (i<setTokens.size()) {//Supprime des tokens vides en trop, précise les types pour faciliter l'algorithme
+			if (setTokens.get(i).getNom().equals(""))
+				setTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
+			else if (setTokens.get(i).getNom().equals("+")) {
+				if (setTokens.get(i+2).getNom().equals("+")) {
+					setTokens.remove(i+2);
+					setTokens.set(i, new OpeUnaire("++"));
+				}
+				else i++;
+					
+			}
+			else if (setTokens.get(i).getNom().equals("-")) {
+				if (setTokens.get(i+2).getNom().equals("-")) {
+					setTokens.remove(i+2);
+					setTokens.set(i, new OpeUnaire("--"));
+				}
+				else i++;
+					
+			}
+			else if (setTokens.get(i).getClass() == Variable.class) {// une fonction était de type variable, devient TokenFonction
+				if (setTokens.get(i+1).getNom().equals("(")) {
+					setTokens.set(i, new TokenFonction(setTokens.get(i).getNom()));
+				}
+				else i++;
+				
+			}
+			else i++;
 		}
+	}//makeTokens
+	
+	public void execution() {
+		
 	}
 
 	@Override
@@ -66,7 +95,7 @@ public class Parser implements ListeMots{
 		if (isEgal(token))
 			return true;
 		return false;
-	}
+	}//isToken
 
 	@Override
 	public boolean isToken(String token) {
@@ -103,6 +132,16 @@ public class Parser implements ListeMots{
 	public boolean isOperateur(char token) {
 		for (int i=0; i< OPERATEURS.length ; i++) {
 			if (token == OPERATEURS[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean isOpeUnaire(String token) {
+		for (int i=0; i< OPE_UNAIRE.length ; i++) {
+			if (token == OPE_UNAIRE[i]) {
 				return true;
 			}
 		}
@@ -172,13 +211,13 @@ public class Parser implements ListeMots{
 	public Token differentiation(String nom) {
 		if (isInt(nom))
 			return createToken(Integer.parseInt(nom));
-		else return createToken(nom,null);
+		else if (isType(nom))
+			return new Type(nom);
+		else return createToken(nom,null);//variable sans valeur
 	}
 
 	@Override
 	public Token differentiation(char nom) {
 		return createToken(nom);
 			}
-
-
 }

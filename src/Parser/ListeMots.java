@@ -7,6 +7,7 @@ public interface ListeMots {
 
 	final String[] TYPES = {"char", "int", "void"};
 	final char[] OPERATEURS = {'+','-','/','*'};
+	final String[] OPE_UNAIRE= {"++","--"};
 	final char[] SYNTAXE = {'(',')','{','}','[',']',';',','};
 	final char[] COMPARATEUR = {'!','<','>'};
 	final char EGAL = '=';
@@ -17,6 +18,7 @@ public interface ListeMots {
 	
 	public boolean isType(String token);
 	public boolean isOperateur(char token);
+	public boolean isOpeUnaire(String token);
 	public boolean isSyntaxe(char token);
 	public boolean isComparateur(char token);
 	public boolean isEgal(char token);

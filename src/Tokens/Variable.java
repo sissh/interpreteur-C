@@ -9,15 +9,15 @@ public class Variable extends Token{
 		this.valeur=nvValeur;
 	}
 	
-	private Token getType() {
+	public Token getType() {
 		return this.type;
 	}
 	
-	private Object getValeur() {
+	public Object getValeur() {
 		return this.valeur;
 	}
 	
-	private void setType(Token nvType) {
+	public void setType(Token nvType) {
 		this.type=nvType;
 	}
 

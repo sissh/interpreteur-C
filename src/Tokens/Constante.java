@@ -10,7 +10,7 @@ public class Constante extends Token{
 		this.valeur=nvValeur;
 	}
 	
-	private Object getValeur() {
+	public Object getValeur() {
 		return this.valeur;
 	}
 

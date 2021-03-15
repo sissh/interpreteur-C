@@ -20,32 +20,161 @@ public class Parser implements ListeMots{
 	
 	public void makeTokens() {
 		String parse = "";
-		for (int i=0; i < this.chaine.length() ; i++) {
-			char chr = this.chaine.charAt(i);
+		for (int i=0; i < chaine.length() ; i++) {
+			char chr = chaine.charAt(i);
 			if (chr==' '){// si parse contient un objet, l'ajouter. Si c'est des espaces en trop, supprimer.
 				if (parse.equals(" ") || parse.equals("")) {
 					parse="";
 					continue;
 				}
 				else {
-					this.setTokens.add(differentiation(parse));
+					setTokens.add(differentiation(parse));
 					parse="";
 					continue;
 				}
 				
 			}
 			else if(isToken(chr)) {
-				this.setTokens.add(differentiation(parse));
-				this.setTokens.add(differentiation(chr));
+				setTokens.add(differentiation(parse));
+				setTokens.add(differentiation(chr));
 				parse="";
 				continue;
 				}
 			parse+=chr;
 		}
-		for (int i=0; i<this.setTokens.size(); i++) {//Supprime des tokens vide en trop
-			if (this.setTokens.get(i).getNom().equals(""))
-				this.setTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
+		int i=0;
+		while (i<setTokens.size()) {//Supprime des tokens vides en trop, précise les types pour faciliter l'algorithme
+			if (setTokens.get(i).getNom().equals(""))
+				setTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
+			else if (setTokens.get(i).getNom().equals("+")) {
+				if (setTokens.get(i+2).getNom().equals("+")) {
+					setTokens.remove(i+2);
+					setTokens.set(i, new OpeUnaire("++"));
+				}
+				else i++;
+					
+			}
+			else if (setTokens.get(i).getNom().equals("-")) {
+				if (setTokens.get(i+2).getNom().equals("-")) {
+					setTokens.remove(i+2);
+					setTokens.set(i, new OpeUnaire("--"));
+				}
+				else i++;
+					
+			}
+			else if (setTokens.get(i).getClass() == Variable.class) {// une fonction était de type variable, devient TokenFonction
+				if (setTokens.get(i+1).getNom().equals("(")) {
+					setTokens.set(i, new TokenFonction(setTokens.get(i).getNom()));
+				}
+				else i++;
+				
+			}
+			else i++;
 		}
+	}//makeTokens
+	
+	public void execution() {
+		int i=0;
+		if (setTokens.get(i).getClass() == Type.class) {
+			i++;
+			if (setTokens.get(i).getClass() == Variable.class) {
+				String erreur= declareVariable((Variable)setTokens.get(i));
+				if (erreur.equals(""))
+					System.out.println("erreur, il faut interrompre");
+			}
+		}
+		else if (setTokens.get(i).getClass() == Variable.class) {
+			if (!existe(setTokens.get(i)))
+				System.out.println("erreur, il faut interrompre");
+		}
+		else System.out.println("erreur, il faut interrompre");
+		
+		int courant = i++;
+		
+		if (!(setTokens.get(i) instanceof Egal))
+			System.out.println("erreur, il faut interrompre");
+		i++;
+		
+		int resultat = compute(this.setTokens, i, true); //convert string après, gestion erreur
+		
+		modifVariable((Variable)setTokens.get(courant));
+		
+		
+	}
+
+	private int compute(ArrayList<Token> setTokens, int i, boolean start) {
+		ArrayList<Token> tokens= new ArrayList<Token>();
+		if (start) {
+			while(i<setTokens.size() || setTokens.get(i).getNom().equals(";"))
+				tokens.add(setTokens.get(i++));
+		}
+		else {
+			while(i<setTokens.size() || setTokens.get(i).getNom().equals(")"))
+				tokens.add(setTokens.get(i++));
+		}
+		return calculLigne(tokens);
+	}
+		
+
+	private int calculLigne(ArrayList<Token> setTokens) {
+		int i=0, temp=0;
+		// gestion du premier token de la ligne
+		if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante)
+			temp=calculArithmetique(temp, new Operateur("+"), setTokens.get(i));
+		else if (setTokens.get(i).getNom().equals("(")){
+			i++;
+			temp=compute(setTokens, i, false);
+		}
+		else
+			System.out.println("erreur, il faut interrompre");
+		
+		while (i<setTokens.size()) {
+			if (setTokens.get(i) instanceof Operateur) {
+				i++;
+				if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante) {
+					temp=calculArithmetique(temp, (Operateur)setTokens.get(i-1), setTokens.get(i));
+				}
+				else if (setTokens.get(i).getNom().equals("(")){
+					i++;
+					temp=compute(setTokens, i, false);
+				}
+				else
+					System.out.println("erreur, il faut interrompre");
+			}
+		}
+		return temp;
+	}
+
+	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private String declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
+		// TODO Auto-generated method stub
+		return "";
+	}
+	
+	private String modifVariable(Variable token) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
+		// TODO Auto-generated method stub
+		return "";
+	}
+	
+	private int calculArithmetique(int gauche, Operateur operateur, Token token) {
+		int droite = 0;
+		if (token instanceof Variable)
+			droite= (int)((Variable) token).getValeur();
+		
+		else if (token instanceof Constante)
+			droite= (int)((Constante) token).getValeur();
+		
+		if (operateur.getNom().equals("+"))
+			return gauche+droite;
+		if (operateur.getNom().equals("-"))
+			return gauche-droite;
+		if (operateur.getNom().equals("*"))
+			return gauche*droite;
+		return gauche/droite;
 	}
 
 	@Override
@@ -66,7 +195,7 @@ public class Parser implements ListeMots{
 		if (isEgal(token))
 			return true;
 		return false;
-	}
+	}//isToken
 
 	@Override
 	public boolean isToken(String token) {
@@ -103,6 +232,16 @@ public class Parser implements ListeMots{
 	public boolean isOperateur(char token) {
 		for (int i=0; i< OPERATEURS.length ; i++) {
 			if (token == OPERATEURS[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean isOpeUnaire(String token) {
+		for (int i=0; i< OPE_UNAIRE.length ; i++) {
+			if (token == OPE_UNAIRE[i]) {
 				return true;
 			}
 		}
@@ -172,13 +311,13 @@ public class Parser implements ListeMots{
 	public Token differentiation(String nom) {
 		if (isInt(nom))
 			return createToken(Integer.parseInt(nom));
-		else return createToken(nom,null);
+		else if (isType(nom))
+			return new Type(nom);
+		else return createToken(nom,null);//variable sans valeur
 	}
 
 	@Override
 	public Token differentiation(char nom) {
 		return createToken(nom);
 			}
-
-
 }

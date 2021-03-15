@@ -54,7 +54,7 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) throws Exception {
+	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleure qu'une exception
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;

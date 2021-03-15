@@ -54,17 +54,25 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static String print(Object [] arguments) {
+	public static char[] print(Object [] arguments) throws Exception {
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;
+		int nbArgs = arguments.length - 1;
+		int nbTrigger = 0;
 
 		while (i < resultat.length()-1) {
+			
+			if (nbTrigger > nbArgs) {
+				throw new Exception ("Erreur: Appel d'argument non existant");
+			}
+			
 			if (resultat.charAt(i) == '%') {
 				
 				if (i < resultat.length() - 2 && testVariablePrint(resultat.charAt(i+1), resultat.charAt(i+2)) ) {
 					resultat = resultat.substring(0, i) + arguments[variable].toString() + resultat.substring(i+2);
 					variable += 1;
+					nbTrigger++;
 					
 				}
 				
@@ -77,7 +85,13 @@ public class Fonctions {
 			i++;
 		}
 		
-		return resultat;
+		char [] resultatCharArray = new char[resultat.length()];
+		
+		for (int j = 0; j < resultat.length(); j++) {
+			resultatCharArray[j] = resultat.charAt(j);
+		}
+		
+		return resultatCharArray;
 	}
 	
 	private static boolean testVariablePrint (char ch1, char ch2) {

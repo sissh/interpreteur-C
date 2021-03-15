@@ -54,7 +54,7 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleure qu'une exception
+	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;
@@ -94,7 +94,7 @@ public class Fonctions {
 		return resultatCharArray;
 	}
 	
-	private static boolean testVariablePrint (char ch1, char ch2) {
+	private static boolean testVariablePrint (char ch1, char ch2) { //TODO: FIX
 		if (ch2 == ' ') {
 			switch (ch1) {
 				case 'd','s','c','f','n':return true;

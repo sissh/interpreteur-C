@@ -75,15 +75,15 @@ public class Parser implements ListeMots{
 	
 	public void execution() {
 		int i=0;
-		if (setTokens.get(i).getClass() == Type.class) {
+		if (setTokens.get(i) instanceof Type) {
 			i++;
-			if (setTokens.get(i).getClass() == Variable.class) {
+			if (setTokens.get(i) instanceof Variable) {
 				String erreur= declareVariable((Variable)setTokens.get(i));
 				if (erreur.equals(""))
 					System.out.println("erreur, il faut interrompre");
 			}
 		}
-		else if (setTokens.get(i).getClass() == Variable.class) {
+		else if (setTokens.get(i) instanceof Variable) {
 			if (!existe(setTokens.get(i)))
 				System.out.println("erreur, il faut interrompre");
 		}

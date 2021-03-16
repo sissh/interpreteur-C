@@ -4,7 +4,7 @@ public class Variable extends Token{
 	private Token type;
 	private Object valeur;
 	
-	public Variable(String nvNom,Object nvValeur) {
+	public Variable(String nvNom,Object nvValeur) {//
 		super(nvNom);
 		this.valeur=nvValeur;
 	}

@@ -95,7 +95,7 @@ public class Parser implements ListeMots{
 			System.out.println("erreur, il faut interrompre");
 		i++;
 		
-		int resultat = compute(this.setTokens, i, true); //convert string après, gestion erreur
+		int resultat = compute(this.setTokens, i, true); //convert string après, gestion erreur, *=, +=, etc
 		
 		modifVariable((Variable)setTokens.get(courant));
 		
@@ -117,7 +117,7 @@ public class Parser implements ListeMots{
 		
 
 	private int calculLigne(ArrayList<Token> setTokens) {
-		int i=0, temp=0;
+		int i=0, temp=0;// gestion du type plus tard
 		// gestion du premier token de la ligne
 		if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante)
 			temp=calculArithmetique(temp, new Operateur("+"), setTokens.get(i));
@@ -161,7 +161,7 @@ public class Parser implements ListeMots{
 	}
 	
 	private int calculArithmetique(int gauche, Operateur operateur, Token token) {
-		int droite = 0;
+		int droite = 0;//gestion types
 		if (token instanceof Variable)
 			droite= (int)((Variable) token).getValeur();
 		
@@ -174,7 +174,7 @@ public class Parser implements ListeMots{
 			return gauche-droite;
 		if (operateur.getNom().equals("*"))
 			return gauche*droite;
-		return gauche/droite;
+		return gauche/droite;//gestion erreurs
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package Parser;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import Tokens.*;
 
@@ -8,10 +10,12 @@ public class Parser implements ListeMots{
 
 	private String chaine;
 	private ArrayList<Token> setTokens;
+	private HashMap<String, Token> variables;
 	
-	public Parser(String chaine) {
+	public Parser(String chaine, HashMap<String, Token> variables) {
 		this.chaine = chaine;
-		setTokens=new ArrayList<Token>();
+		this.setTokens=new ArrayList<Token>();
+		this.variables = variables;
 	}
 	
 	public ArrayList<Token> getTokens() {
@@ -73,61 +77,65 @@ public class Parser implements ListeMots{
 		}
 	}//makeTokens
 	
-	public void execution() {
+	public Object execution() {//retourne l'array de variables si ok
 		int i=0;
 		if (setTokens.get(i) instanceof Type) {
 			i++;
 			if (setTokens.get(i) instanceof Variable) {
-				String erreur= declareVariable((Variable)setTokens.get(i));
-				if (erreur.equals(""))
-					System.out.println("erreur, il faut interrompre");
+				((Variable)setTokens.get(i)).setType((Type)setTokens.get(i-1));
+				boolean ok = declareVariable((Variable)setTokens.get(i));
+				if (!ok)
+					return "La variable "+setTokens.get(i).getNom()+" a déjà été initialisée précédemment";
 			}
 		}
 		else if (setTokens.get(i) instanceof Variable) {
 			if (!existe(setTokens.get(i)))
-				System.out.println("erreur, il faut interrompre");
+				return "Token "+setTokens.get(i).getNom()+" non initialisé précédemment";
 		}
-		else System.out.println("erreur, il faut interrompre");
+		else return "Début d'expression interdite";
 		
 		int courant = i++;
 		
 		if (!(setTokens.get(i) instanceof Egal))
-			System.out.println("erreur, il faut interrompre");
+			return "Token "+setTokens.get(i).getNom()+" inattendu, le programme devait trouver un \"=\"";
 		i++;
 		
-		int resultat = compute(this.setTokens, i, true); //convert string après, gestion erreur, *=, +=, etc
+		Object resultat = compute(this.setTokens, i, true);
+		if (resultat instanceof String)
+			return resultat;
+		modifVariable((Variable)setTokens.get(courant), resultat);//tester type de retour
 		
-		modifVariable((Variable)setTokens.get(courant));
-		
-		
+		return variables;
 	}
 
-	private int compute(ArrayList<Token> setTokens, int i, boolean start) {
+	private Object compute(ArrayList<Token> setTokens, int i, boolean start) {
 		ArrayList<Token> tokens= new ArrayList<Token>();
 		if (start) {
-			while(i<setTokens.size() || setTokens.get(i).getNom().equals(";"))
+			while(!setTokens.get(i).getNom().equals(";"))
 				tokens.add(setTokens.get(i++));
 		}
 		else {
 			while(i<setTokens.size() || setTokens.get(i).getNom().equals(")"))
 				tokens.add(setTokens.get(i++));
+			if (!setTokens.get(i).getNom().equals(")"))
+				return "Parenthèse ouverte non fermée";
 		}
 		return calculLigne(tokens);
 	}
 		
 
-	private int calculLigne(ArrayList<Token> setTokens) {
-		int i=0, temp=0;// gestion du type plus tard
+	private Object calculLigne(ArrayList<Token> setTokens) {//création d'un arbre binaire de calcul
+		int i=0;
+		Object temp=0;// gestion du type plus tard
 		// gestion du premier token de la ligne
-		if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante)
-			temp=calculArithmetique(temp, new Operateur("+"), setTokens.get(i));
+		if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante) 
+			temp=calculArithmetique(temp, new Operateur("+"), setTokens.get(i++));
 		else if (setTokens.get(i).getNom().equals("(")){
 			i++;
 			temp=compute(setTokens, i, false);
 		}
 		else
 			System.out.println("erreur, il faut interrompre");
-		
 		while (i<setTokens.size()) {
 			if (setTokens.get(i) instanceof Operateur) {
 				i++;
@@ -146,21 +154,22 @@ public class Parser implements ListeMots{
 	}
 
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
-		// TODO Auto-generated method stub
-		return false;
+		return variables.containsKey(token.getNom());
 	}
 
-	private String declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
-		// TODO Auto-generated method stub
-		return "";
+	private boolean declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
+		if (variables.containsKey(token.getNom()))
+			return false;
+		variables.put(token.getNom(), token);
+		return true;
 	}
 	
-	private String modifVariable(Variable token) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
-		// TODO Auto-generated method stub
-		return "";
+	private void modifVariable(Variable token, Object nvValeur) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
+		token.setValeur(nvValeur);
+		variables.put(token.getNom(),token);
 	}
 	
-	private int calculArithmetique(int gauche, Operateur operateur, Token token) {
+	private int calculArithmetique(Object gauche, Operateur operateur, Token token) {
 		int droite = 0;//gestion types
 		if (token instanceof Variable)
 			droite= (int)((Variable) token).getValeur();
@@ -169,12 +178,12 @@ public class Parser implements ListeMots{
 			droite= (int)((Constante) token).getValeur();
 		
 		if (operateur.getNom().equals("+"))
-			return gauche+droite;
+			return (int)gauche+droite;
 		if (operateur.getNom().equals("-"))
-			return gauche-droite;
+			return (int)gauche-droite;
 		if (operateur.getNom().equals("*"))
-			return gauche*droite;
-		return gauche/droite;//gestion erreurs
+			return (int)gauche*droite;
+		return (int)gauche/droite;//gestion erreurs
 	}
 
 	@Override

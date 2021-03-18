@@ -17,8 +17,16 @@ public class Variable extends Token{
 		return this.valeur;
 	}
 	
-	public void setType(Token nvType) {
+	public void setValeur(Object nvValeur) {
+		this.valeur = nvValeur;
+	}
+	
+	public void setType(Type nvType) {
 		this.type=nvType;
+	}
+	
+	public String toString() {
+		return super.toString()+ " type : "+this.getType()+" valeur : "+this.getValeur();
 	}
 
 }

@@ -91,14 +91,17 @@ public class Parser{
 							ligne.remove(i);
 							if (ligne.get(i).getNom().equals(","))
 								ligne.remove(i);
-							else System.out.println("erreur 88");
+							else if(!ligne.get(i).getNom().equals(")"))
+								System.out.println("erreur 88");
 						}
 						else if (ligne.get(i) instanceof Constante) {
+							System.out.println(ligne);
 							parametres.add(((Constante)ligne.get(i)).getValeur());
 							ligne.remove(i);
-							if (ligne.get(i).getNom().equals(","))
+							if (ligne.get(i).getNom().equals(",")) 
 								ligne.remove(i);
-							else System.out.println("erreur 95");
+							else if(!ligne.get(i).getNom().equals(")"))
+								System.out.println("erreur 95");
 						}
 						else System.out.println("erreur 97");
 						

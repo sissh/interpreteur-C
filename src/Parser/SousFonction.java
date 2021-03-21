@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import Tokens.*;
 
-public class Fonction {
+public class SousFonction {
 	
 	Parser parser;
 	HashMap<String, Variable> variablesLocales;
@@ -13,7 +13,7 @@ public class Fonction {
 	private ArrayList<Token> ligne;
 	int indice;
 	
-	public Fonction (ArrayList<Token> nvListeTokens) {
+	public SousFonction (ArrayList<Token> nvListeTokens) {
 		arrayListTokens = nvListeTokens;
 		ligne = new ArrayList<Token>();
 		variablesLocales = new HashMap<String, Variable>();

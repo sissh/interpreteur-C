@@ -12,7 +12,7 @@ public class Fonctions {
 	}
 
 	
-	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) {
+	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 
 		Object [] arguments = argsArrayList.toArray();
 		
 		switch(nomFonction) {
@@ -58,7 +58,7 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception
+	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception.
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;

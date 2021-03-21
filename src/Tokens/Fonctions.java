@@ -1,5 +1,7 @@
 package Tokens;
 
+import java.util.ArrayList;
+
 public class Fonctions {
 	private String fonctionNom;
 	private Object fonctionArgs ;
@@ -10,7 +12,9 @@ public class Fonctions {
 	}
 
 	
-	public static String execFonction(String nomFonction, Object [] arguments) {	
+	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) {
+		Object [] arguments = argsArrayList.toArray();
+		
 		switch(nomFonction) {
 			case "pow":
 				if (arguments[0] instanceof Integer && arguments[1] instanceof Integer) {

@@ -60,7 +60,7 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) {			//TODO: trouver meilleur qu'une exception.
+	public static char[] print(Object [] arguments) {			//TODO: trouver meilleur qu'un return 
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;

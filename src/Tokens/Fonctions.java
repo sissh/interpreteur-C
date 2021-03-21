@@ -1,5 +1,7 @@
 package Tokens;
 
+import java.util.ArrayList;
+
 public class Fonctions {
 	private String fonctionNom;
 	private Object fonctionArgs ;
@@ -10,7 +12,9 @@ public class Fonctions {
 	}
 
 	
-	public static String execFonction(String nomFonction, Object [] arguments) {	
+	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 
+		Object [] arguments = argsArrayList.toArray();
+		
 		switch(nomFonction) {
 			case "pow":
 				if (arguments[0] instanceof Integer && arguments[1] instanceof Integer) {
@@ -54,7 +58,7 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception
+	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception.
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;

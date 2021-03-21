@@ -12,7 +12,7 @@ public class Fonctions {
 	}*/
 
 	
-	public static Object execFonction(String nomFonction, ArrayList<Object> argsArrayList) throws Exception { 
+	public static Object execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 
 		Object [] arguments = argsArrayList.toArray();
 		
 		switch(nomFonction) {
@@ -60,17 +60,23 @@ public class Fonctions {
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) throws Exception {			//TODO: trouver meilleur qu'une exception.
+	public static char[] print(Object [] arguments) {			//TODO: trouver meilleur qu'une exception.
 		String resultat = arguments[0].toString();
 		int variable = 1;
 		int i = 0;
 		int nbArgs = arguments.length - 1;
 		int nbTrigger = 0;
+		char [] resultatCharArray = new char[resultat.length()];
+		
 
 		while (i < resultat.length()-1) {
 			
 			if (nbTrigger > nbArgs) {
-				throw new Exception ("Erreur: Appel d'argument non existant");
+				for (int j = 0; j < resultat.length(); j++) {
+					resultatCharArray[j] = resultat.charAt(j);
+				}
+				
+				return resultatCharArray;
 			}
 			
 			if (resultat.charAt(i) == '%') {
@@ -90,8 +96,6 @@ public class Fonctions {
 			
 			i++;
 		}
-		
-		char [] resultatCharArray = new char[resultat.length()];
 		
 		for (int j = 0; j < resultat.length(); j++) {
 			resultatCharArray[j] = resultat.charAt(j);

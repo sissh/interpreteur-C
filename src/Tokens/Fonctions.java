@@ -3,13 +3,13 @@ package Tokens;
 import java.util.ArrayList;
 
 public class Fonctions {
-	private String fonctionNom;
+	/*private String fonctionNom;												//Variable inutiles : utilisées pour des tests isolées
 	private Object fonctionArgs ;
 	
 	public Fonctions(String nom, Object [] arguments) {
 		fonctionNom = nom;
 		fonctionArgs = arguments;
-	}
+	}*/
 
 	
 	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 

@@ -13,5 +13,9 @@ public class Constante extends Token{
 	public Object getValeur() {
 		return this.valeur;
 	}
+	
+	public String toString() {
+		return super.toString()+ " valeur : "+this.getValeur();
+	}
 
 }

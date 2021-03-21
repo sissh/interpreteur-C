@@ -6,7 +6,8 @@ import Tokens.Variable;
 public interface ListeMots {
 
 	final String[] TYPES = {"char", "int", "void"};
-	final char[] OPERATEURS = {'+','-','/','*'};
+	final char[] OPERATEURS_1 = {'/','*', '%'};
+	final char[] OPERATEURS_2 = {'+','-'};
 	final String[] OPE_UNAIRE= {"++","--"};
 	final char[] SYNTAXE = {'(',')','{','}','[',']',';',','};
 	final char[] COMPARATEUR = {'!','<','>'};
@@ -17,7 +18,8 @@ public interface ListeMots {
 	public boolean isToken(char token);
 	
 	public boolean isType(String token);
-	public boolean isOperateur(char token);
+	public boolean isOperateur_1(char token);
+	public boolean isOperateur_2(char token);
 	public boolean isOpeUnaire(String token);
 	public boolean isSyntaxe(char token);
 	public boolean isComparateur(char token);

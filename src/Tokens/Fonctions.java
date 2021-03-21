@@ -12,14 +12,13 @@ public class Fonctions {
 	}*/
 
 	
-	public static String execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 
+	public static Object execFonction(String nomFonction, ArrayList<Object> argsArrayList) throws Exception { 
 		Object [] arguments = argsArrayList.toArray();
 		
 		switch(nomFonction) {
 			case "pow":
 				if (arguments[0] instanceof Integer && arguments[1] instanceof Integer) {
-					pow(arguments);
-					return messageErreur(0);
+					return pow(arguments);
 				}
 				
 				else if (arguments[0] instanceof Integer && !(arguments[1] instanceof Integer) ) {
@@ -29,6 +28,9 @@ public class Fonctions {
 				else if (!(arguments[0]instanceof Integer) && arguments[1] instanceof Integer) {
 					return messageErreur(2);
 				}
+				
+			case "printf":
+				return print(arguments);
 				
 			default: return messageErreur(42);
 		}

@@ -2,8 +2,6 @@ package Parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import Tokens.*;
 
 public class Code implements ListeMots{
@@ -46,9 +44,9 @@ public class Code implements ListeMots{
 			if (arrayListTokens.get(i).getNom().equals(""))
 				arrayListTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
 			else if (arrayListTokens.get(i).getNom().equals("+")) {
-				if (arrayListTokens.get(i+2).getNom().equals("+")) {
-					arrayListTokens.remove(i+2);
-					arrayListTokens.set(i, new OpeUnaire("++"));
+				if (arrayListTokens.get(i-1).getNom().equals("+")) {
+					arrayListTokens.remove(i);
+					arrayListTokens.set(i-1, new OpeUnaire("++"));
 				}
 				else i++;
 					

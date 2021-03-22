@@ -4,16 +4,14 @@ public class ClientTokens {
 
 	public static void main(String []args) {
 		
-		String a = "int a = pow(2,2);";
+		String a = "int a; ++a;";//ne peut pas faire "a=a-2", pk a passe à null ?
 		Code code = new Code(a);
 		code.makeTokens();
-		/*Class cla = null;
-		for (int i=0; i<code.getTokens().size(); i++) {
-			cla=code.getTokens().get(i).getClass();
-			System.out.println(code.getTokens().get(i).toString()+" "+cla);
-		}*/
+		
 		SousFonction fonction = new SousFonction(code.getTokens());
-		fonction.execLigneSuivante();
+		System.out.println(fonction.execLigneSuivante()+"\n");
+		System.out.println(fonction.execLigneSuivante()+"\n");
+		System.out.println(fonction.execLigneSuivante()+"\n");
 		//Tester chaque fonction de calcul
 	}
 }

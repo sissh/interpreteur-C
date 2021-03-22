@@ -14,106 +14,104 @@ public class Parser{
 		this.ligne = new ArrayList<Token>();
 	}
 	
-	public Object execution(ArrayList<Token> nvLigne) {//retourne l'array de variables si ok
-		int i=0;
+	public Object execution(ArrayList<Token> nvLigne) {
 		ligne=nvLigne;
-		if (nvLigne.get(i) instanceof Type) {
-			if (ligne.get(i+1) instanceof Variable) {
-				((Variable)(ligne.get(i+1))).setType((Type)ligne.get(i));
-				boolean ok = declareVariable((Variable)ligne.get(i+1));
+		if (nvLigne.get(0) instanceof Type) {
+			if (ligne.get(1) instanceof Variable) {
+				boolean ok = declareVariable((Variable)ligne.get(1));
 				if (!ok)
-					return "La variable "+ligne.get(i+1).getNom()+" a déjà été initialisée précédemment";
+					return "La variable "+ligne.get(1).getNom()+" a déjà été déclarée précédemment";
+				variables.get(ligne.get(1).getNom()).setType((Type)ligne.get(0));//assigne le type
+				ligne.remove(0);
+				if (ligne.size()==1){//si déclaration sans assignation de valeur
+					ligne.remove(0);
+					return variables;
+				}
 			}
-			ligne.remove(i);
+			else return "Variable attentue après une déclaration de type";
 		}
-		else if (ligne.get(i) instanceof Variable) {
-			if (!existe(ligne.get(i)))
-				return "Token "+ligne.get(i).getNom()+" non initialisé précédemment";
+		else if (ligne.get(0) instanceof Variable) {
+			if (!existe(ligne.get(0)))
+				return "Token "+ligne.get(0).getNom()+" non initialisé précédemment";
+		}
+		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;"
+			String courant = ligne.get(1).getNom();
+			if (variables.get(courant).getValeur()==null)
+				return "Attention ! Ne jamais incrémenter une variable non instancée";
+			variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+			return variables;
 		}
 		else return "Début d'expression interdite";
+		String courant = ligne.get(0).getNom();
+		ligne.remove(0);
 		
-		Variable courant = (Variable)ligne.get(i);
-		ligne.remove(i);
-		
-		if (!(ligne.get(i) instanceof Egal))//gérer autres types d'assignation de valeur
-			return "Token "+ligne.get(i).getNom()+" inattendu, le programme devait trouver un \"=\"";
-		ligne.remove(i);
+		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
+			if (variables.get(courant).getValeur()==null)
+				return "Attention ! Ne jamais incrémenter une variable non instancée";
+			variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+			return variables;
+		}
+		else if (!(ligne.get(0) instanceof Egal))//gérer autres types d'assignation de valeur
+			return "Token "+ligne.get(0).getNom()+" inattendu, le programme devait trouver un \"=\"";
+		ligne.remove(0);
 
+		String error=errorCalculUnaire();
+		if (!error.equals(""))
+			return error;
 		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
 		calculUnairePrefixe();
 		String erreur = execFonctions();
 		if (!erreur.equals(""))
 			return erreur;
-		System.out.println("courant : "+courant+"\nligne : "+ligne+"\n------\n\n");
 		calculLigne1();
 		calculLigne2();
-		System.out.println("courant : "+courant+"\nligne : "+ligne+"\n------\n\n");
-		System.out.println(variables);
-		modifVariable(courant, ligne.get(i));//assignation
-		System.out.println(variables);
+		if (ligne.get(0) instanceof Constante)
+			modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
+		else
+			modifVariable(courant, getVariablesValeur(ligne.get(0).getNom()));//assignation
 		for (int j=0; j<calculSuffixe.size();j++ ) {
 			String nomamodifier = calculSuffixe.get(j);
-			variables.get(calculSuffixe.get(j)).setValeur(((int)variables.get(nomamodifier).getValeur())+1);//incrémentation dans la mémoire
+			variables.get(nomamodifier).setValeur(variables.get(nomamodifier).getValeur());
+			variables.get(nomamodifier).setValeur(((int)variables.get(nomamodifier).getValeur())+1);//incrémentation dans la mémoire
 		}
+		ligne.remove(0);//suppresion de la constante finale
 		return variables;
-	}
-
-	private Object compute(ArrayList<Token> setTokens, int i, boolean start) {
-		ArrayList<Token> tokens= new ArrayList<Token>();
-		if (start) {
-			while(!setTokens.get(i).getNom().equals(";"))
-				tokens.add(setTokens.get(i++));
-		}
-		else {
-			while(i<setTokens.size() || setTokens.get(i).getNom().equals(")"))
-				tokens.add(setTokens.get(i++));
-			if (!setTokens.get(i).getNom().equals(")"))
-				return "Parenthèse ouverte non fermée";
-		}
-		//int indiceTokens = 0;
-		//while () {
-			
-		//}
-		return calculLigne(tokens);
 	}
 	
 	public String execFonctions() {//de nombreuses erreurs à gérer
 		int i=0;
 		while (i<ligne.size()) {
 			if (ligne.get(i) instanceof TokenFonction) {
-				String nomFonction = ligne.get(i++).getNom();
+				String nomFonction = ligne.get(i).getNom();ligne.remove(i);
 				if (i<ligne.size() && ligne.get(i).getNom().equals("(")) {
 					ligne.remove(i);
 					ArrayList <Object> parametres = new ArrayList <Object>();
 					while (i<ligne.size() && !ligne.get(i).getNom().equals(")")) {
 						if (ligne.get(i) instanceof Variable) {
-							parametres.add( ((Variable)ligne.get(i)).getValeur() );
+							parametres.add(getVariablesValeur(ligne.get(i).getNom()));
 							ligne.remove(i);
 							if (ligne.get(i).getNom().equals(","))
 								ligne.remove(i);
 							else if(!ligne.get(i).getNom().equals(")"))
-								System.out.println("erreur 88");
+								return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", ligne.get(i).getNom());
 						}
 						else if (ligne.get(i) instanceof Constante) {
-							System.out.println(ligne);
 							parametres.add(((Constante)ligne.get(i)).getValeur());
 							ligne.remove(i);
 							if (ligne.get(i).getNom().equals(",")) 
 								ligne.remove(i);
 							else if(!ligne.get(i).getNom().equals(")"))
-								System.out.println("erreur 95");
+								return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", ligne.get(i).getNom());
 						}
-						else System.out.println("erreur 97");
+						else return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), "paramètre", ligne.get(i).getNom());
 						
 					}
-					if (!ligne.get(i).getNom().equals(")"))
-						System.out.println("erreur 101");
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
 						return (String)resultat;
 					ligne.set(i, new Constante(resultat));
 				}
-				else System.out.println("erreur, parenthèse attendue après une fonction");//fonction sans parenthèses
+				else return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", "rien");
 			}
 			i++;
 		}
@@ -135,12 +133,33 @@ public class Parser{
 		return variablesAIncrementer;
 	}
 	
+	public String errorCalculUnaire() {//si tentative d'incrémenter constantes
+		int i=0;
+		while (i<ligne.size()) {
+			if (!(ligne.get(i++) instanceof Variable)) {
+				if (i<ligne.size() && ligne.get(i) instanceof OpeUnaire) {
+					return "Tentative d'incrémenter un Token qui n'est pas une variable";
+				}
+				else i++;
+			}
+		}
+		i=0;
+		while (i<ligne.size()) {
+			if (ligne.get(i++) instanceof OpeUnaire) {
+				if (i<ligne.size() && !(ligne.get(i) instanceof Variable)) {
+					return "Tentative d'incrémenter un Token qui n'est pas une variable";
+				}
+				else i++;
+			}
+		}
+		return "";
+	}
+	
 	public void calculUnairePrefixe(){
 		int i=0;
 		while (i<ligne.size()) {
 			if (ligne.get(i++) instanceof OpeUnaire) {
-				if (i<ligne.size() && ligne.get(i) instanceof Variable) {
-					((Variable)ligne.get(i)).setValeur((int)(((Variable)ligne.get(i)).getValeur())+1);//incrémentation locale, pour calculs de ligne					
+				if (i<ligne.size() && ligne.get(i) instanceof Variable) {					
 					variables.get(ligne.get(i).getNom()).setValeur(((Variable)ligne.get(i)).getValeur());//incrémentation dans la mémoire
 					ligne.remove(i-1);
 				}
@@ -161,11 +180,12 @@ public class Parser{
 					if (i<ligne.size() && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
 						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Variable)ligne.get(i-1)).getValeur(),ligne.get(i),((Variable)ligne.get(i+1)).getValeur()));
+							getVariablesValeur(ligne.get(i).getNom());
+							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(((Variable)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else System.out.println("erreur, ou parenthèse pas encore gérée");
@@ -177,7 +197,7 @@ public class Parser{
 					if (i<ligne.size() && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
 						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Variable)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
@@ -205,11 +225,11 @@ public class Parser{
 					if (i<ligne.size() && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
 						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Variable)ligne.get(i-1)).getValeur(),ligne.get(i),((Variable)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(((Variable)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else System.out.println("erreur, ou parenthèse pas encore gérée");
@@ -221,7 +241,7 @@ public class Parser{
 					if (i<ligne.size() && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
 						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Variable)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
 							ligne.remove(i);ligne.remove(i); i=0;
 						}
 						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
@@ -236,36 +256,6 @@ public class Parser{
 			}
 		}
 	}
-		
-
-	private Object calculLigne(ArrayList<Token> setTokens) {//création d'un arbre binaire de calcul
-		int i=0;
-		Object temp=0;// gestion du type plus tard
-		// gestion du premier token de la ligne
-		if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante) 
-			temp=calculArithmetique(temp, new Operateur_1("+"), setTokens.get(i++));
-		else if (setTokens.get(i).getNom().equals("(")){
-			i++;
-			temp=compute(setTokens, i, false);
-		}
-		else
-			System.out.println("erreur, il faut interrompre");
-		while (i<setTokens.size()) {
-			if (setTokens.get(i) instanceof Operateur_1) {
-				i++;
-				if (setTokens.get(i) instanceof Variable || setTokens.get(i) instanceof Constante) {
-					temp=calculArithmetique(temp, (Operateur_1)setTokens.get(i-1), setTokens.get(i));
-				}
-				else if (setTokens.get(i).getNom().equals("(")){
-					i++;
-					temp=compute(setTokens, i, false);
-				}
-				else
-					System.out.println("erreur, il faut interrompre");
-			}
-		}
-		return temp;
-	}
 
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
 		return variables.containsKey(token.getNom());
@@ -278,18 +268,13 @@ public class Parser{
 		return true;
 	}
 	
-	private void modifVariable(Variable token, Object nvValeur) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
-		token.setValeur(nvValeur);
-		variables.put(token.getNom(),token);
+	private void modifVariable(String nomToken, Object nvValeur) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
+		if (!(nvValeur instanceof Integer))
+			System.out.println("La valeur à mettre en mémoire n'est pas un Integer");
+		variables.get(nomToken).setValeur(nvValeur);
 	}
 	
 	private Constante calculArithmetique(Object gauche, Token token, Object droite) {
-		//int droite = 0;//gestion types
-		/*if (token instanceof Variable)
-			droite= (int)((Variable) token).getValeur();
-		
-		else if (token instanceof Constante)
-			droite= (int)((Constante) token).getValeur();*/
 		int resultat = 0;
 		if (token.getNom().equals("+"))
 			resultat = (int)gauche+(int)droite;
@@ -304,6 +289,13 @@ public class Parser{
 		else System.out.println("erreur");
 		return new Constante(resultat);//gestion erreurs
 	}
+	
+	private Object getVariablesValeur(String nomVariable) {
+		return variables.get(nomVariable).getValeur();
+	}
 
+	private String standardErrorMessage(int numLigne, String attendu, String trouve) {
+		return "Erreur ligne "+numLigne+", token '"+attendu+"' attendu, mais "+trouve+" trouvé";
+	}
 	
 }

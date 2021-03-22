@@ -78,7 +78,7 @@ public class Parser{
 		return variables;
 	}
 	
-	public String execFonctions() {//de nombreuses erreurs à gérer
+	private String execFonctions() {//de nombreuses erreurs à gérer
 		int i=0;
 		while (i<ligne.size()) {
 			if (ligne.get(i) instanceof TokenFonction) {
@@ -118,7 +118,7 @@ public class Parser{
 		return "";
 	}
 	
-	public ArrayList<String> calculUnaireSuffixe(){
+	private ArrayList<String> calculUnaireSuffixe(){
 		ArrayList<String> variablesAIncrementer = new ArrayList<String>();
 		int i=0;
 		while (i<ligne.size()) {
@@ -133,7 +133,7 @@ public class Parser{
 		return variablesAIncrementer;
 	}
 	
-	public String errorCalculUnaire() {//si tentative d'incrémenter constantes
+	private String errorCalculUnaire() {//si tentative d'incrémenter constantes
 		int i=0;
 		while (i<ligne.size()) {
 			if (!(ligne.get(i++) instanceof Variable)) {
@@ -155,7 +155,7 @@ public class Parser{
 		return "";
 	}
 	
-	public void calculUnairePrefixe(){
+	private void calculUnairePrefixe(){
 		int i=0;
 		while (i<ligne.size()) {
 			if (ligne.get(i++) instanceof OpeUnaire) {
@@ -168,7 +168,7 @@ public class Parser{
 		}
 	}
 	
-	public void calculLigne1 () {//calcul des multiplications, divisions, modulo
+	private void calculLigne1 () {//calcul des multiplications, divisions, modulo
 		int i=0;
 		boolean continuer=true;
 		while (i<ligne.size() && continuer) {
@@ -213,7 +213,7 @@ public class Parser{
 		}
 	}
 	
-	public void calculLigne2 () {//calcul des multiplications, divisions, modulo
+	private void calculLigne2 () {//calcul des multiplications, divisions, modulo
 		int i=0;
 		boolean continuer=true;
 		while (i<ligne.size() && continuer) {

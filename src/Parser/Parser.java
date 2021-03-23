@@ -80,7 +80,6 @@ public class Parser{
 	private Object execFonctions(int debut, int fin) {//de nombreuses erreurs à gérer
 		int i=debut;
 		while (i<fin) {
-			System.out.println("i : "+i+" fin : "+fin+" ligne : "+ligne);
 			if (ligne.get(i) instanceof TokenFonction) {
 				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1;
 				if (i<fin && ligne.get(i).getNom().equals("(")) {
@@ -88,7 +87,12 @@ public class Parser{
 					ArrayList <Object> parametres = new ArrayList <Object>();
 					while (i<fin && !ligne.get(i).getNom().equals(")")) {
 						if (ligne.get(i) instanceof Variable) {
-							parametres.add(getVariablesValeur(ligne.get(i).getNom()));
+							if (!existe(ligne.get(i)))
+								System.out.print("afafefefef");
+							Object error=getVariablesValeur(ligne.get(i).getNom());
+							if (error==null)
+								return standardErrorMessage("variable", ligne.get(i).getNom());
+							parametres.add(error);
 							ligne.remove(i); fin-=1;
 							if (i==ligne.size())
 								return standardErrorMessage(")", "rien");
@@ -138,7 +142,7 @@ public class Parser{
 					ligne.set(i, new Constante(resultat));
 				}
 				else if (!(i<fin))//programme terminé
-					return "Erreur 133";
+					return standardErrorMessage("(", ligne.get(i).getNom());
 				else return standardErrorMessage("(", ligne.get(i).getNom());
 			}
 			i++;
@@ -335,6 +339,10 @@ public class Parser{
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
 		return variables.containsKey(token.getNom());
 	}
+	
+	/*private boolean nonDeclare(Token token) {
+		if existe(token && variables.get(token.getNom()))
+	}*/
 
 	private boolean declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
 		if (variables.containsKey(token.getNom()))

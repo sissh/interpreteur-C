@@ -63,6 +63,7 @@ public class Parser{
 		String erreur = initCalcul();
 		if (!erreur.equals(""))
 			return erreur;
+		System.out.println(ligne);
 		if (ligne.get(0) instanceof Constante)
 			modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
 		else
@@ -105,7 +106,6 @@ public class Parser{
 								ligne.remove(i); fin-=1;}
 							else if(!ligne.get(i).getNom().equals(")"))
 								return standardErrorMessage(")", ligne.get(i).getNom());
-							//System.out.println(ligne+"   i : "+i+" fin : "+fin);
 						}
 						else if (ligne.get(i) instanceof TokenFonction) {//gestion des fonctions imbriquées
 							int gauche=0, droite=0, indice=i+1;
@@ -312,7 +312,6 @@ public class Parser{
 			}
 			else i++;
 		}
-		System.out.println(ligne);
 		return calculLigne(0, ligne.size());
 	}
 	

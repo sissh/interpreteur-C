@@ -1,26 +1,24 @@
 package Vue;
 
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JLabel ;
+import javax.swing.*;
+import javax.swing.text.*;
 
 
 public class ConsoleAndMemory extends JPanel {
 	
-	JTextArea console ;
-
+	JTextPane console ;
+	JScrollPane consoleScrollable ;
 	Memory memory ;
+	JScrollPane memoireScrollable ;
 	JTable memoire ;
-	static String PHRASE = "Tout le malheur des hommes vient d'un seule chose,"
-			+ " qui est de ne pas savoir demeurer au repos dans une anticonstitutionnelement";
+	Color ERROR = Color.RED ;
+	Color MSG = Color.GREEN ;
+	
 	public ConsoleAndMemory() {
 		
 		
@@ -28,78 +26,95 @@ public class ConsoleAndMemory extends JPanel {
 		
 
 		
-		console = new JTextArea("[Console ]: ",20,20) ;
+		console = new JTextPane();
+		appendToPane(console,"[Console ]:\n",MSG) ;
 		console.setSize(55, 100);
+		
 
 		memory = new Memory();
 		memoire = new JTable() ;
 		
 		memoire.setModel(memory);
 		memoire.setOpaque(true);
+		memoire.setDragEnabled(false);
+		memoire.setCellSelectionEnabled(false);
+		
 		memoire.setFont(new Font ("Verdana",Font.ITALIC,16));
+		memoireScrollable = new JScrollPane(memoire,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); 
 		
 		console.setEditable(false);
 		console.setOpaque(true);
 		console.setForeground(Color.GREEN) ;
-		console.setFont(new Font ("Times",Font.ITALIC,18));
+		console.setFont(new Font ("Times",Font.ITALIC,12));
 		console.setBackground(new Color(10,10,10));
+		consoleScrollable = new JScrollPane(console,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); 
 		
-		afficheConsole(console, PHRASE) ;
+	/*	afficheConsole(console, PHRASE) ;
+		String[] test = coupeString(PHRASE) ;
+		for(int i = 0 ; i < test.length; i ++) {
+			System.out.println(test[i]) ;
+		}*/
 		
+		add(memoireScrollable);
+
 		
-		System.out.println(console.getSize()) ;
-		
-		
-		add(memoire);
-		
-		add(console);
+		add(consoleScrollable);
 		
 		
 		
 	}
 	
-	private String[] coupeString(String chaine) {
-		int nbEspace = 0 ;
+
 	
-		for(int taille = 0 ; taille < chaine.length(); taille++){
-			if(chaine.charAt(taille) == ' ') {
-				nbEspace++ ;
-			}
+	
+	
+	public void afficheMessage(JTextPane textPane, String phrase) {
+		textPane.setEditable(true);
+		appendToPane(textPane,phrase,MSG) ;
+		appendToPane(textPane,"\n[Console ]:\n",MSG);
+		textPane.setEditable(false);
 		}
-		String[] chaineCouper = new String[nbEspace+1]  ;
-		String boutChaine = "" ;
-		int j = 0 ;
-		for(int i = 0; i < chaine.length();i++) {
-		if(chaine.charAt(i) != ' ') {
-			boutChaine += chaine.charAt(i) ;
+	
+	public void afficheError(JTextPane textPane, String error) {
+		textPane.setEditable(true);
+		appendToPane(textPane,error,ERROR) ;
+		appendToPane(textPane,"\n[Console ]:\n",MSG);
+		textPane.setEditable(false);
 		}
-		else {
-			chaineCouper[j] = boutChaine ;
-			j++ ;
-		}
-		}
-		chaineCouper[j] = boutChaine ;
-		return chaineCouper ;
+	
+	
+	protected void Clear(JTextPane textPane) {
+		textPane.setText("[Console ]:\n");		
 	}
 	
+	private void appendToPane(JTextPane tp, String msg, Color c)
+    {
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Times");
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+    }
 	
 	
-	protected void afficheConsole(JTextArea textArea, String valeur) {
-		for(int i = 0 ; i < valeur.length(); i ++) {
-			if(i%5005 == 0) {
-				textArea.append("\n");
-			}
-			char val = valeur.charAt(i) ;
-			textArea.append(String.valueOf(val));
-		}
-		textArea.append("\n[Console ]: ");
-	}
-	
-	
-	
- protected Memory getMemory() {
+	public Memory getMemory() {
 	 return memory ;
  }
 	
-	
+
+	public JTextPane getConsole() {
+	 return console ;
+ }
+
+
+
 }

@@ -60,11 +60,9 @@ public class Parser{
 			return error;
 		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
 		calculUnairePrefixe();
-		String erreur = execFonctions();
+		String erreur = initCalcul();
 		if (!erreur.equals(""))
 			return erreur;
-		calculLigne1();
-		calculLigne2();
 		if (ligne.get(0) instanceof Constante)
 			modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
 		else
@@ -78,32 +76,60 @@ public class Parser{
 		return variables;
 	}
 	
-	private String execFonctions() {//de nombreuses erreurs à gérer
-		int i=0;
-		while (i<ligne.size()) {
+	private Object execFonctions(int debut, int fin) {//de nombreuses erreurs à gérer
+		int i=debut;
+		while (i<fin) {
+			System.out.println("i : "+i+" fin : "+fin+" ligne : "+ligne);
 			if (ligne.get(i) instanceof TokenFonction) {
-				String nomFonction = ligne.get(i).getNom();ligne.remove(i);
-				if (i<ligne.size() && ligne.get(i).getNom().equals("(")) {
-					ligne.remove(i);
+				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1;
+				if (i<fin && ligne.get(i).getNom().equals("(")) {
+					ligne.remove(i); fin-=1;
 					ArrayList <Object> parametres = new ArrayList <Object>();
-					while (i<ligne.size() && !ligne.get(i).getNom().equals(")")) {
+					while (i<fin && !ligne.get(i).getNom().equals(")")) {
 						if (ligne.get(i) instanceof Variable) {
 							parametres.add(getVariablesValeur(ligne.get(i).getNom()));
-							ligne.remove(i);
-							if (ligne.get(i).getNom().equals(","))
-								ligne.remove(i);
+							ligne.remove(i); fin-=1;
+							if (i==ligne.size())
+								return standardErrorMessage(")", "rien");
+							else if (ligne.get(i).getNom().equals(",")) {
+								ligne.remove(i); fin-=1;}
 							else if(!ligne.get(i).getNom().equals(")"))
-								return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", ligne.get(i).getNom());
+								return standardErrorMessage(")", ligne.get(i).getNom());
 						}
 						else if (ligne.get(i) instanceof Constante) {
 							parametres.add(((Constante)ligne.get(i)).getValeur());
-							ligne.remove(i);
-							if (ligne.get(i).getNom().equals(",")) 
-								ligne.remove(i);
+							ligne.remove(i); fin-=1;
+							if (i==ligne.size())
+								return standardErrorMessage(")", "rien");
+							else if (ligne.get(i).getNom().equals(",")) {
+								ligne.remove(i); fin-=1;}
 							else if(!ligne.get(i).getNom().equals(")"))
-								return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", ligne.get(i).getNom());
+								return standardErrorMessage(")", ligne.get(i).getNom());
+							//System.out.println(ligne+"   i : "+i+" fin : "+fin);
 						}
-						else return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), "paramètre", ligne.get(i).getNom());
+						else if (ligne.get(i) instanceof TokenFonction) {//gestion des fonctions imbriquées
+							int gauche=0, droite=0, indice=i+1;
+							do {
+								if (ligne.get(indice).getNom().equals("("))
+									gauche++;
+								else if (ligne.get(indice).getNom().equals(")"))
+									droite++;
+								indice++;
+							}while (droite<gauche && indice<ligne.size());
+							Object error = execFonctions(i,indice);
+							fin-=indice-1;//-1 parce que décalage d'un au-dessus, c'est le nombre de tokens que j'ai supprimé, permet à la fonction appelante de ne pas subir le décalage( index out of range si fin supérieur à ligne.size() )
+							parametres.add(((Constante)ligne.get(i)).getValeur());//erreur : ajout sans vérification (,), rajouter conditions
+							ligne.remove(i); fin-=1;
+							if (error instanceof String)
+								return error;
+							else if (i==ligne.size())
+								return standardErrorMessage(")", "rien");
+							else if (ligne.get(i).getNom().equals(",")) {
+								ligne.remove(i); fin-=1;}
+							else if(!ligne.get(i).getNom().equals(")"))
+								return standardErrorMessage(")", ligne.get(i).getNom());
+						}
+						else return standardErrorMessage("paramètre", ligne.get(i).getNom());
 						
 					}
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
@@ -111,11 +137,13 @@ public class Parser{
 						return (String)resultat;
 					ligne.set(i, new Constante(resultat));
 				}
-				else return standardErrorMessage(Thread.currentThread().getStackTrace()[0].getLineNumber(), ")", "rien");
+				else if (!(i<fin))//programme terminé
+					return "Erreur 133";
+				else return standardErrorMessage("(", ligne.get(i).getNom());
 			}
 			i++;
 		}
-		return "";
+		return fin;
 	}
 	
 	private ArrayList<String> calculUnaireSuffixe(){
@@ -168,93 +196,141 @@ public class Parser{
 		}
 	}
 	
-	private void calculLigne1 () {//calcul des multiplications, divisions, modulo
-		int i=0;
+	private Object calculLigne1 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+		int i;
 		boolean continuer=true;
-		while (i<ligne.size() && continuer) {
-			i=0;
+		while (debut<fin && continuer) {
+			i=debut;
 			continuer = false;
-			while (i<ligne.size()) {
+			while (i<fin) {
 				if (ligne.get(i) instanceof Variable) {
 					i++;
-					if (i<ligne.size() && ligne.get(i) instanceof Operateur_1) {
+					if (i<fin && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
-						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
-							getVariablesValeur(ligne.get(i).getNom());
+						if (i<fin && ligne.get(i+1) instanceof Variable) {
 							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
+						else if (i<fin && ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else System.out.println("erreur, ou parenthèse pas encore gérée");
+						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 					}
 					else i++;
 				}
 				else if (ligne.get(i) instanceof Constante) {
 					i++;
-					if (i<ligne.size() && ligne.get(i) instanceof Operateur_1) {
+					if (i<fin && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
-						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
+						if (i<fin && ligne.get(i+1) instanceof Variable) {
 							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
+						else if (i<fin && ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else System.out.println("erreur, ou parenthèse pas encore gérée");
+						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 					}
 					else i++;
 				}
 				else i++;
 			}
 		}
+		return fin;
 	}
 	
-	private void calculLigne2 () {//calcul des multiplications, divisions, modulo
-		int i=0;
+	private String calculLigne2 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+		int i;
 		boolean continuer=true;
-		while (i<ligne.size() && continuer) {
-			i=0;
+		while (debut<fin && continuer) {
+			i=debut;
 			continuer = false;
-			while (i<ligne.size()) {
+			while (i<fin) {
 				if (ligne.get(i) instanceof Variable) {
 					i++;
-					if (i<ligne.size() && ligne.get(i) instanceof Operateur_2) {
+					if (i<fin && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
-						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
+						if (i<fin && ligne.get(i+1) instanceof Variable) {
 							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
+						else if (i<fin && ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else System.out.println("erreur, ou parenthèse pas encore gérée");
+						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 					}
 					else i++;
 				}
 				else if (ligne.get(i) instanceof Constante) {
 					i++;
-					if (i<ligne.size() && ligne.get(i) instanceof Operateur_2) {
+					if (i<fin && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
-						if (i<ligne.size() && ligne.get(i+1) instanceof Variable) {
+						if (i<fin && ligne.get(i+1) instanceof Variable) {
 							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else if (i<ligne.size() && ligne.get(i+1) instanceof Constante) {
+						else if (i<fin && ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=0;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
-						else System.out.println("erreur, ou parenthèse pas encore gérée");
+						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 					}
 					else i++;
 				}
 				else i++;
 			}
 		}
+		return "";
+	}
+	
+	private String calculLigne(int debut, int fin) {
+		Object erreur = execFonctions(debut, fin);
+		if (erreur instanceof String)
+			return String.valueOf(erreur);
+		int nvFin = (int)erreur;
+		erreur = calculLigne1(debut,nvFin);
+		if (erreur instanceof String)
+			return String.valueOf(erreur);
+		nvFin = (int)erreur;
+		return calculLigne2(debut,nvFin);
+	}
+	
+	private String initCalcul() {
+		int i =0;
+		while (i<ligne.size()) {
+			if (ligne.get(i).getNom().equals("(")) {
+				if (!(ligne.get(i-1) instanceof TokenFonction)) {
+					ligne.remove(i);
+					String error = calculParentheses(i);
+					if (!error.equals(""))
+						return String.valueOf(error);
+				}
+				else i++;
+			}
+			else i++;
+		}
+		System.out.println(ligne);
+		return calculLigne(0, ligne.size());
+	}
+	
+	private String calculParentheses(int debut) {
+		int i=debut;
+		while (i<ligne.size()) {
+			if (ligne.get(i).getNom().equals("(")) {
+				if (!(ligne.get(i-1) instanceof TokenFonction))
+					ligne.remove(i);
+					calculParentheses(i);
+			}
+			else if (ligne.get(i).getNom().equals(")")) {
+				ligne.remove(i);
+				return calculLigne(debut,i-1);
+			}
+			else i++;
+		}
+		return "Parenthèse ouverte non fermée";
 	}
 
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
@@ -294,8 +370,8 @@ public class Parser{
 		return variables.get(nomVariable).getValeur();
 	}
 
-	private String standardErrorMessage(int numLigne, String attendu, String trouve) {
-		return "Erreur ligne "+numLigne+", token '"+attendu+"' attendu, mais "+trouve+" trouvé";
+	private String standardErrorMessage(String attendu, String trouve) {
+		return "Erreur, token '"+attendu+"' attendu, mais "+trouve+" trouvé";
 	}
 	
 }

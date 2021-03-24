@@ -55,19 +55,27 @@ public class Parser{
 			return "Token "+ligne.get(0).getNom()+" inattendu, le programme devait trouver un \"=\"";
 		ligne.remove(0);
 
-		String error=errorCalculUnaire();
-		if (!error.equals(""))
-			return error;
-		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
-		calculUnairePrefixe();
-		String erreur = initCalcul();
+		String erreur=errorCalculUnaire();
 		if (!erreur.equals(""))
 			return erreur;
-		System.out.println(ligne);
-		if (ligne.get(0) instanceof Constante)
-			modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
-		else
-			modifVariable(courant, getVariablesValeur(ligne.get(0).getNom()));//assignation
+		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
+		calculUnairePrefixe();
+		erreur = initCalcul();
+		if (!erreur.equals(""))
+			return erreur;
+		if (ligne.size()!=1)
+			return "Erreur lors de l'exécution";
+		
+		if (ligne.get(0) instanceof Constante) {
+			erreur=modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
+			if (!erreur.equals(""))
+				return erreur;
+		}
+		else {
+			erreur=modifVariable(courant, getTokenValeur(ligne.get(0)));//assignation
+			if (!erreur.equals(""))
+				return erreur;
+		}
 		for (int j=0; j<calculSuffixe.size();j++ ) {
 			String nomamodifier = calculSuffixe.get(j);
 			variables.get(nomamodifier).setValeur(variables.get(nomamodifier).getValeur());
@@ -87,12 +95,7 @@ public class Parser{
 					ArrayList <Object> parametres = new ArrayList <Object>();
 					while (i<fin && !ligne.get(i).getNom().equals(")")) {
 						if (ligne.get(i) instanceof Variable) {
-							if (!existe(ligne.get(i)))
-								System.out.print("afafefefef");
-							Object error=getVariablesValeur(ligne.get(i).getNom());
-							if (error==null)
-								return standardErrorMessage("variable", ligne.get(i).getNom());
-							parametres.add(error);
+							parametres.add(getTokenValeur(ligne.get(i)));
 							ligne.remove(i); fin-=1;
 							if (i==ligne.size())
 								return standardErrorMessage(")", "rien");
@@ -138,7 +141,7 @@ public class Parser{
 					}
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
-						return (String)resultat;
+						return resultat.toString();
 					ligne.set(i, new Constante(resultat));
 				}
 				else if (!(i<fin))//programme terminé
@@ -187,6 +190,14 @@ public class Parser{
 		return "";
 	}
 	
+	private String verifNullVariables() {
+		for (int i=0; i<ligne.size(); i++) {
+			if (ligne.get(i) instanceof Variable && getTokenValeur(ligne.get(i))==null)
+				return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant.";
+		}
+		return "";
+	}
+	
 	private void calculUnairePrefixe(){
 		int i=0;
 		while (i<ligne.size()) {
@@ -203,7 +214,7 @@ public class Parser{
 	private Object calculLigne1 (int debut, int fin) {//calcul des multiplications, divisions, modulo
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {
+		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
 			i=debut;
 			continuer = false;
 			while (i<fin) {
@@ -212,11 +223,11 @@ public class Parser{
 					if (i<fin && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
 						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
+							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
@@ -228,7 +239,7 @@ public class Parser{
 					if (i<fin && ligne.get(i) instanceof Operateur_1) {
 						continuer=true;
 						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
+							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getTokenValeur(ligne.get(i+1))));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else if (i<fin && ligne.get(i+1) instanceof Constante) {
@@ -257,11 +268,11 @@ public class Parser{
 					if (i<fin && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
 						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
+							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getVariablesValeur(ligne.get(i-1).getNom()),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
+							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
@@ -273,7 +284,7 @@ public class Parser{
 					if (i<fin && ligne.get(i) instanceof Operateur_2) {
 						continuer=true;
 						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getVariablesValeur(ligne.get(i+1).getNom())));
+							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getTokenValeur(ligne.get(i+1))));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
 						}
 						else if (i<fin && ligne.get(i+1) instanceof Constante) {
@@ -303,10 +314,13 @@ public class Parser{
 	}
 	
 	private String initCalcul() {
+		String verif = verifNullVariables(); 
+		if (!verif.equals(""))
+			return verif;
 		int i =0;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
-				if (!(ligne.get(i-1) instanceof TokenFonction)) {
+				if (i==0 || !(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
 					String error = calculParentheses(i);
 					if (!error.equals(""))
@@ -339,10 +353,6 @@ public class Parser{
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
 		return variables.containsKey(token.getNom());
 	}
-	
-	/*private boolean nonDeclare(Token token) {
-		if existe(token && variables.get(token.getNom()))
-	}*/
 
 	private boolean declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
 		if (variables.containsKey(token.getNom()))
@@ -351,10 +361,11 @@ public class Parser{
 		return true;
 	}
 	
-	private void modifVariable(String nomToken, Object nvValeur) {//modifie la variable dans la mémoire la variable. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
-		if (!(nvValeur instanceof Integer))
-			System.out.println("La valeur à mettre en mémoire n'est pas un Integer");
+	private String modifVariable(String nomToken, Object nvValeur) {//modifie la variable dans la mémoire. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
+		/*if (!(nvValeur instanceof Integer))
+			return "Erreur, calcul impossible, ou incompatibilité de type";*/
 		variables.get(nomToken).setValeur(nvValeur);
+		return "";
 	}
 	
 	private Constante calculArithmetique(Object gauche, Token token, Object droite) {
@@ -373,8 +384,12 @@ public class Parser{
 		return new Constante(resultat);//gestion erreurs
 	}
 	
-	private Object getVariablesValeur(String nomVariable) {
-		return variables.get(nomVariable).getValeur();
+	private Object getTokenValeur(Token token) {
+		if (token instanceof Variable) {
+			try{return variables.get(token.getNom()).getValeur();}
+			catch(Exception e) {return null;}
+		}
+		return ((Constante)token).getValeur();
 	}
 
 	private String standardErrorMessage(String attendu, String trouve) {

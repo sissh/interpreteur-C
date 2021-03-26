@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
- * {@summary}
  * La classe qui va créée l'interface graphique de l'application, à partir de différents composants graphiques.
  * @see Vue.ConsoleAndMemory
  * @see Vue.Memory

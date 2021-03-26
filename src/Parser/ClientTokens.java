@@ -4,7 +4,7 @@ public class ClientTokens {
 
 	public static void main(String []args) {
 		
-		String a = "int a=2; int b; a=5;";//5.5 variable, changer en constante
+		String a = "int a=2; int b=3; a+=b;";//5.5 variable, changer en constante
 		Code code = new Code(a);
 		code.makeTokens();
 		SousFonction fonction = new SousFonction(code.getTokens());

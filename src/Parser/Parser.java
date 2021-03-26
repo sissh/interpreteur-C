@@ -37,19 +37,32 @@ public class Parser{
 		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;"
 			String courant = ligne.get(1).getNom();
 			if (variables.get(courant).getValeur()==null)
-				return "Attention ! Ne jamais incrémenter une variable non instancée";
-			variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée";
+			if (ligne.get(0).getNom().equals("++"))
+				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+			else 
+				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())-1);
 			return variables;
 		}
 		else return "Début d'expression interdite";
 		String courant = ligne.get(0).getNom();
 		ligne.remove(0);
 		
+		
+		Token signe =null;//pour assignation signée
 		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
 			if (variables.get(courant).getValeur()==null)
 				return "Attention ! Ne jamais incrémenter une variable non instancée";
-			variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+			if (ligne.get(0).getNom().equals("++"))
+				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
+			else 
+				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())-1);
 			return variables;
+		}
+		else if (ligne.get(0) instanceof Operateur_1 || ligne.get(0) instanceof Operateur_2) {
+			if (ligne.size()!=1 && ligne.get(1) instanceof Egal)//assignation signée ex "a*=5;"
+				signe = ligne.get(0);
+			ligne.remove(0);
 		}
 		else if (!(ligne.get(0) instanceof Egal))//gérer autres types d'assignation de valeur
 			return "Token "+ligne.get(0).getNom()+" inattendu, le programme devait trouver un \"=\"";
@@ -66,16 +79,10 @@ public class Parser{
 		if (ligne.size()!=1)
 			return "Erreur lors de l'exécution";
 		
-		if (ligne.get(0) instanceof Constante) {
-			erreur=modifVariable(courant, ((Constante)ligne.get(0)).getValeur());//assignation
-			if (!erreur.equals(""))
-				return erreur;
-		}
-		else {
-			erreur=modifVariable(courant, getTokenValeur(ligne.get(0)));//assignation
-			if (!erreur.equals(""))
-				return erreur;
-		}
+		if (signe!=null)
+			ligne.set(0, calculArithmetique(getTokenValeur(variables.get(courant)),signe, getTokenValeur(ligne.get(0))));
+		modifVariable(courant, ligne.get(0));
+		
 		for (int j=0; j<calculSuffixe.size();j++ ) {
 			String nomamodifier = calculSuffixe.get(j);
 			variables.get(nomamodifier).setValeur(variables.get(nomamodifier).getValeur());
@@ -218,35 +225,18 @@ public class Parser{
 			i=debut;
 			continuer = false;
 			while (i<fin) {
-				if (ligne.get(i) instanceof Variable) {
+				if (ligne.get(i) instanceof Variable || ligne.get(i) instanceof Constante) {
 					i++;
 					if (i<fin && ligne.get(i) instanceof Operateur_1) {
-						continuer=true;
-						if (i<fin && ligne.get(i+1) instanceof Variable) {
+						continuer=true;//tant qu'il reste des tokens à exécuter, continuer
+						if (i+1<ligne.size()) {
+							if (ligne.get(i+1) instanceof Variable || ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;							
+							}
+							else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 						}
-						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
-					}
-					else i++;
-				}
-				else if (ligne.get(i) instanceof Constante) {
-					i++;
-					if (i<fin && ligne.get(i) instanceof Operateur_1) {
-						continuer=true;
-						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getTokenValeur(ligne.get(i+1))));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
+						else return "Erreur sur la ligne, probablement un Token mal placé ou en trop";//ex : "int a= 1+2 * ;"
 					}
 					else i++;
 				}
@@ -259,39 +249,22 @@ public class Parser{
 	private String calculLigne2 (int debut, int fin) {//calcul des multiplications, divisions, modulo
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {
+		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
 			i=debut;
 			continuer = false;
 			while (i<fin) {
-				if (ligne.get(i) instanceof Variable) {
+				if (ligne.get(i) instanceof Variable || ligne.get(i) instanceof Constante) {
 					i++;
 					if (i<fin && ligne.get(i) instanceof Operateur_2) {
-						continuer=true;
-						if (i<fin && ligne.get(i+1) instanceof Variable) {
+						continuer=true;//tant qu'il reste des tokens à exécuter, continuer
+						if (i+1<ligne.size()) {
+							if (ligne.get(i+1) instanceof Variable || ligne.get(i+1) instanceof Constante) {
 							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
+							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;							
+							}
+							else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
 						}
-						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
-					}
-					else i++;
-				}
-				else if (ligne.get(i) instanceof Constante) {
-					i++;
-					if (i<fin && ligne.get(i) instanceof Operateur_2) {
-						continuer=true;
-						if (i<fin && ligne.get(i+1) instanceof Variable) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),getTokenValeur(ligne.get(i+1))));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else if (i<fin && ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(((Constante)ligne.get(i-1)).getValeur(),ligne.get(i),((Constante)ligne.get(i+1)).getValeur()));
-							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;
-						}
-						else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
+						else return "Erreur sur la ligne, probablement un Token mal placé ou en trop";//ex : "int a= 1+2 * ;"
 					}
 					else i++;
 				}
@@ -361,11 +334,12 @@ public class Parser{
 		return true;
 	}
 	
-	private String modifVariable(String nomToken, Object nvValeur) {//modifie la variable dans la mémoire. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
-		/*if (!(nvValeur instanceof Integer))
-			return "Erreur, calcul impossible, ou incompatibilité de type";*/
-		variables.get(nomToken).setValeur(nvValeur);
-		return "";
+	private void modifVariable(String nomToken, Token nvValeur) {//modifie la variable dans la mémoire. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
+		
+		if (nvValeur instanceof Constante)
+			variables.get(nomToken).setValeur(((Constante) nvValeur).getValeur());
+		else
+			variables.get(nomToken).setValeur(getTokenValeur(nvValeur));
 	}
 	
 	private Constante calculArithmetique(Object gauche, Token token, Object droite) {

@@ -8,7 +8,10 @@ import java.awt.GridLayout;
 import javax.swing.*;
 import javax.swing.text.*;
 
-
+/**
+ * Classe qui crée la console et la table et qui s'occupe de l'affichage sur la console.
+ * @author kosin
+ */
 public class ConsoleAndMemory extends JPanel {
 	
 	JTextPane console ;
@@ -19,6 +22,10 @@ public class ConsoleAndMemory extends JPanel {
 	Color ERROR = Color.RED ;
 	Color MSG = Color.GREEN ;
 	
+	
+	/**
+	 * Constructeur de la classe qui créer la console et la table "mémoire" et les fusionnent en une entité.
+	 */
 	public ConsoleAndMemory() {
 		
 		
@@ -37,7 +44,13 @@ public class ConsoleAndMemory extends JPanel {
 		memoire.setModel(memory);
 		memoire.setOpaque(true);
 		memoire.setDragEnabled(false);
+		memoire.setFocusable(false);
 		memoire.setCellSelectionEnabled(false);
+
+		
+		
+		
+		
 		
 		memoire.setFont(new Font ("Verdana",Font.ITALIC,16));
 		memoireScrollable = new JScrollPane(memoire,
@@ -60,7 +73,6 @@ public class ConsoleAndMemory extends JPanel {
 		}*/
 		
 		add(memoireScrollable);
-
 		
 		add(consoleScrollable);
 		
@@ -71,14 +83,22 @@ public class ConsoleAndMemory extends JPanel {
 
 	
 	
-	
+	/**
+	 * Méthode qui affiche un message sur un textPane (la console).
+	 * @param phrase String qui sera le texte affiché.
+	 * @param textPane JTextPane qui sera le support du texte entré.
+	 */
 	public void afficheMessage(JTextPane textPane, String phrase) {
 		textPane.setEditable(true);
 		appendToPane(textPane,phrase,MSG) ;
 		appendToPane(textPane,"\n[Console ]:\n",MSG);
 		textPane.setEditable(false);
 		}
-	
+	/**
+	 * Méthode qui affiche une "erreur" sur un textPane (la console).
+	 * @param error String qui sera le texte affiché.
+	 * @param textPane JTextPane qui sera le support du texte entré.
+	 */
 	public void afficheError(JTextPane textPane, String error) {
 		textPane.setEditable(true);
 		appendToPane(textPane,error,ERROR) ;
@@ -86,11 +106,20 @@ public class ConsoleAndMemory extends JPanel {
 		textPane.setEditable(false);
 		}
 	
-	
+	/**
+	 * Méthode qui permet d'effacer la console
+	 * @param textPane JTextPane qui est la console à effacer.
+	 */
 	protected void Clear(JTextPane textPane) {
 		textPane.setText("[Console ]:\n");		
 	}
 	
+	/**
+	 * Méthode utilise par @see afficheMessage et @see afficheError pour afficher le texte sur la console.
+	 * @param tp JTextPane qui sera le support du texte entré.
+	 * @param msg String qui est le message à afficher.
+	 * @param c Color quie est la couleur du message.
+	 */
 	private void appendToPane(JTextPane tp, String msg, Color c)
     {
         StyleContext sc = StyleContext.getDefaultStyleContext();
@@ -105,12 +134,18 @@ public class ConsoleAndMemory extends JPanel {
         tp.replaceSelection(msg);
     }
 	
-	
+	/**
+	 * Méthode qui permet d'obtenir le champ memory.
+	 * @return memory Le champ memory.
+	 */
 	public Memory getMemory() {
 	 return memory ;
  }
 	
-
+	/**
+	 * Méthode qui permet d'obtenir le champ memory.
+	 * @return console JTextPane qui est le champ console.
+	 */
 	public JTextPane getConsole() {
 	 return console ;
  }

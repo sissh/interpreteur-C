@@ -8,7 +8,7 @@ import java.awt.* ;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class FenetreMere extends JFrame implements ActionListener{
+public class FenetreMere extends JFrame implements ActionListener{ 
 
 	JPanel contentPane ;
 	JPanel Block  ;

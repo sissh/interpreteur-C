@@ -3,45 +3,54 @@ package Tokens;
 import java.util.ArrayList;
 
 public class Fonctions {
-	/*private String fonctionNom;												//Variable inutiles : utilisées pour des tests isolées
-	private Object fonctionArgs ;
-	
-	public Fonctions(String nom, Object [] arguments) {
-		fonctionNom = nom;
-		fonctionArgs = arguments;
-	}*/
 
-	
+//Cette méthode reçoit le nom de la fonction demandées et ses arguments: elle vérifie la validité des arguments et exécute la fonction demandée	
 	public static Object execFonction(String nomFonction, ArrayList<Object> argsArrayList) { 
 		Object [] arguments = argsArrayList.toArray();
 		
-		switch(nomFonction) {
+		switch(nomFonction) {			//Switch qui filtre les erreurs d'arguments et exécute les fonctions demandées: renvoi un msg d'erreur si arg invalide
 			case "pow":
-				if (arguments[0] instanceof Integer && arguments[1] instanceof Integer) {
-					return pow(arguments);
+				if (arguments.length < 2) {							//Pas assez d'arguments
+					return messageErreur(3);
 				}
 				
-				else if (arguments[0] instanceof Integer && !(arguments[1] instanceof Integer) ) {
+				if (arguments.length > 2) {							//Trop d'arguments
+					return messageErreur(4);
+				}
+				
+				if (!(arguments[0] instanceof Integer) && !(arguments[1] instanceof Integer)) {		//Aucun argument valide
+					return messageErreur(5);
+				}
+				
+				else if (arguments[0] instanceof Integer && !(arguments[1] instanceof Integer) ) {		//Premier argument valide, second non
 					return messageErreur(1);
 				}
 				
-				else if (!(arguments[0]instanceof Integer) && arguments[1] instanceof Integer) {
+				else if (!(arguments[0]instanceof Integer) && arguments[1] instanceof Integer) {		//Second argument valide, premier non
 					return messageErreur(2);
+				}
+				
+				else {
+					return pow(arguments);			//Exécution de pow
 				}
 				
 			case "printf":
 				return print(arguments);
 				
-			default: return messageErreur(42);
+			default: return messageErreur(42);			//Fonction non reconnue : ne devrait pas apparaître car non appelé par le parser
 		}
 
 	}
-	
+
+//Cette méthode privée répertorie les différents message d'erreur selon leur code d'erreur, pour la lisibilité.
 	private static String messageErreur(int codeErreur) {
 		switch(codeErreur) {
 			case 0: return "Aucun problï¿½me rencontrï¿½.";
 			case 1: return "Erreur au second argument : type Int attendu.";
 			case 2: return "Erreur au premier argument : type Int attendu.";
+			case 3: return "Erreur : pas assez d'arguments.";
+			case 4: return "Erreur : trop d'arguments.";
+			case 5: return "Erreur : Aucun argument de type Int.";
 			
 			
 			
@@ -49,47 +58,42 @@ public class Fonctions {
 			default: return "Ce message n'est pas censï¿½ apparaï¿½tre.";
 		}
 	}
-	
+
+//Fonction power du C 	
 	public static int pow(Object [] arguments) {	
-		int nb = Integer.parseInt(arguments[0].toString());
+		int nb = Integer.parseInt(arguments[0].toString());				//Récupération des type Object du parser et conversion en Int
 		int puiss = Integer.parseInt(arguments[1].toString());
 		int resultat = 1;
 		for (int i = 0; i < puiss; i++) {
-			resultat = resultat * nb;
+			resultat = resultat * nb;				//Calcul de puissance
 		}		
 		return resultat;		
 	}
 	
-	public static char[] print(Object [] arguments) {			//TODO: trouver meilleur qu'un return 
-		String resultat = arguments[0].toString();
-		int variable = 1;
+	
+//Fonction printf du C	
+	public static char[] print(Object [] arguments) {			
+		String phrase = arguments[0].toString();								//La fonction travail avec des String, pour la méthode subString()
+		String erreur1 = "Erreur : trop d'appel d'arguments";								//Gestion d'erreur à l'interieur de print :
+		String erreur2 = "Erreur : pas assez d'arguments en paramètres";						//Impossible pour execFonction de savoir s'il y a trop ou pas assez de %
+		int argCourant = 1;
 		int i = 0;
-		int nbArgs = arguments.length - 1;
-		int nbTrigger = 0;
-		char [] resultatCharArray = new char[resultat.length()];
+		int nbArgs = arguments.length - 1;										//Compte le nb d'arguments
+		int nbTrigger = nbArgs;														//Compte le nb de % détectés par la fonction: on part du principe qu'il y en aura autant que d'args
+		char [] resultatCharArray = new char[phrase.length() + arguments.length];			//Array de char du resultat
+		char [] erreurCharArray = new char [erreur2.length()];								//Array de char du msg d'erreur
 		
 
-		while (i < resultat.length()-1) {
+		while (i < phrase.length()-1) {			//Parcours de la phrase: taille variable car elle est changée quand on trouve des %
 			
-			if (nbTrigger > nbArgs) {
-				for (int j = 0; j < resultat.length(); j++) {
-					resultatCharArray[j] = resultat.charAt(j);
-				}
+			if (phrase.charAt(i) == '%') {		//Détection d'un %
 				
-				return resultatCharArray;
-			}
-			
-			if (resultat.charAt(i) == '%') {
-				
-				if (i < resultat.length() - 2 && testVariablePrint(resultat.charAt(i+1), resultat.charAt(i+2)) ) {
-					resultat = resultat.substring(0, i) + arguments[variable].toString() + resultat.substring(i+2);
-					variable += 1;
-					nbTrigger++;
-					
-				}
-				
-				else if (i <= resultat.length() - 1 && testVariablePrint(resultat.charAt(i+1), ' ')) {
-					resultat = resultat.substring(0, i) + arguments[variable].toString();
+				if (i < phrase.length() - 1 && testVariablePrint(phrase.charAt(i+1))) {		//Vérifie si le charactère qui suit % fait parti de ceux appelant un argument
+					if (nbTrigger > 0) {
+						phrase = phrase.substring(0, i) + arguments[argCourant].toString() + phrase.substring(i+2);	//Découpe du String :
+						argCourant += 1;									//On coupe jusqu'à avant le %, on concatène l'argument puis le reste de la phrase
+					}
+					nbTrigger--;	//Passe à la variable suivante; ajoute 1 au décompte de % trouvé.			
 				}
 				
 			}
@@ -97,21 +101,35 @@ public class Fonctions {
 			i++;
 		}
 		
-		for (int j = 0; j < resultat.length(); j++) {
-			resultatCharArray[j] = resultat.charAt(j);
+		if (nbTrigger == 0) {							//Si il y a bien autant d'appel d'arguments que d'arguments, on renvoie le resultat
+			for (int j = 0; j < phrase.length(); j++) {		//conversion du String en charArray
+				resultatCharArray[j] = phrase.charAt(j);		
+			}
+			return resultatCharArray;
 		}
 		
-		return resultatCharArray;
+		else if (nbTrigger < 0) {							//S'il y a plus d'appel d'arguments que d'arguments, on renvoi une erreur
+			for (int e1 = 0; e1 < erreur1.length(); e1++) {
+				erreurCharArray[e1] = erreur1.charAt(e1);
+			}
+			return erreurCharArray;
+		}
+		
+		else {													//S'il y a moins d'appel d'arguments que d'arguments, on renvoi une erreur
+			for (int e2 = 0; e2 < erreur2.length(); e2++) {
+				erreurCharArray[e2] = erreur2.charAt(e2);
+			}
+			return erreurCharArray;
+		}
+		
 	}
-	
-	private static boolean testVariablePrint (char ch1, char ch2) { //TODO: FIX
-		if (ch2 == ' ') {
+
+//Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant
+	private static boolean testVariablePrint (char ch1) { 
 			switch (ch1) {
-				case 'd','s','c','f','n':return true;
+				case 'd','s','c','f','n':return true;		//TODO: Trier par type IMPORTANT
 				default:return false;
 			}
-		}
-		return false;
 	}
 	
 

@@ -1,5 +1,6 @@
 package Vue;
 
+import javax.lang.model.type.UnknownTypeException;
 import javax.swing.* ;
 
 import javax.swing.text.* ;
@@ -370,6 +371,18 @@ public class FenetreMere extends JFrame implements ActionListener{
 	}
 	
 
+	
+	public void printf(String message, int type) throws Exception {
+		if(type == 0) {
+			ConsoleMemoire.afficheMessage(ConsoleMemoire.getConsole(),message) ;
+		}
+		else if(type == 1) {
+			ConsoleMemoire.afficheError(ConsoleMemoire.getConsole() , message);
+		}
+		else {
+			throw new Exception("Unknown int parameter \'type\'. Must be 0 or 1")  ;
+		}
+	}
 
 	/**
 	 * Méthode qui écoute et attend l'action d'un bouton.
@@ -460,7 +473,12 @@ public class FenetreMere extends JFrame implements ActionListener{
 		}
 		else if(event.getActionCommand() == "enter") {
 			ajoutTable(VALEURS_TEST_DEUX) ;
-			InterfaceC.setText("");
+			try {
+				printf("Salut",35) ;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

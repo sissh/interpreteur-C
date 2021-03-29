@@ -9,6 +9,8 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import java.awt.* ;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 /**
@@ -121,6 +123,12 @@ public class FenetreMere extends JFrame implements ActionListener{
 	ArrayList<Integer> refDebutLigne = new ArrayList<Integer>() ;
 	
 	/**
+	 * String qui recoit les valeurs entrées par l'utilisateur
+	 */
+	String EntreeScanf ;
+	
+	
+	/**
 	 * Valeurs de tests
 	 */
 	static String [] VALEURS_TEST = {nextIndice(),"a","int","15","1564"} ;
@@ -203,17 +211,16 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 		
 		InterfaceC.setSize(500,500) ;
-		InterfaceC.setText("#include <stdio.h>\n" + 
-				"\n" + 
-				"int main(void)\n" + 
-				"{\n" + 
-				"	char a[15] = \"Hello world\" ;\n" + 
-				"	int chiffre = 18 ;\n" + 
-				"	printf(\"%s\\n\", a) ;\n" + 
-				"	printf(\"Welcome in the wonderful world of C%d programing\\n\", chiffre);\n" + 
-				"	return 0;\n" + 
-				"} \n" + 
-				"");
+		InterfaceC.setText("#include <stdio.h>\r\n" + 
+				"\r\n" + 
+				"int main(void)\r\n" + 
+				"{\r\n" + 
+				"	char a[15] = \"Hello world\" ;\r\n" + 
+				"	int chiffre = 18 ;\r\n" + 
+				"	printf(\"%s\\n\", a) ;\r\n" + 
+				"	printf(\"Welcome in the wonderful world of C%d programing\\n\", chiffre);\r\n" + 
+				"	return 0;\r\n" + 
+				"} ");
 		
 		
 		
@@ -372,15 +379,12 @@ public class FenetreMere extends JFrame implements ActionListener{
 	
 
 	
-	public void printf(String message, int type) throws Exception {
+	public static void affichePrintf(String message, int type){
 		if(type == 0) {
 			ConsoleMemoire.afficheMessage(ConsoleMemoire.getConsole(),message) ;
 		}
 		else if(type == 1) {
 			ConsoleMemoire.afficheError(ConsoleMemoire.getConsole() , message);
-		}
-		else {
-			throw new Exception("Unknown int parameter \'type\'. Must be 0 or 1")  ;
 		}
 	}
 
@@ -390,11 +394,13 @@ public class FenetreMere extends JFrame implements ActionListener{
 	 */
 	public void actionPerformed(ActionEvent event) {
 		// TODO Auto-generated method stubm
-		if(event.getActionCommand() == "reset"){
+
+	  if(event.getActionCommand() == "reset"){
 			//ConsoleMemoire.Clear(ConsoleMemoire.getConsole());
 			indiceLecture = 0 ;
 			ligneActive =  0;
 			iteration = 0 ;
+			ConsoleMemoire.getMemory().setRowCount(0) ;
 			InterfaceC.getHighlighter().removeAllHighlights();
 			InterfaceC.setEditable(true);
 			BackExecute.setVisible(false);
@@ -472,15 +478,11 @@ public class FenetreMere extends JFrame implements ActionListener{
 			InterfaceC.setText("");
 		}
 		else if(event.getActionCommand() == "enter") {
-			ajoutTable(VALEURS_TEST_DEUX) ;
-			try {
-				printf("Salut",35) ;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+			EntreeScanf = InputT.getText() ;
+			affichePrintf(EntreeScanf, 0) ;
+		
 	}
-	
 
+
+	}	
 }

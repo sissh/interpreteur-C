@@ -6,16 +6,24 @@ import Tokens.*;
 
 public class Code implements ListeMots{
 	
-	private String chaine;
+	private Parser parser;
+	private ArrayList<Token> ligne;
 	private ArrayList<Token> arrayListTokens;
-	private HashMap<String, Variable> variablesGlobales; //ajouter plus tard les variables globales
+	private ArrayList<HashMap<String, Variable>> arrayListRecord;
+	public int indice=0;
 	
-	public Code(String nvChaine) {
+	public Code() {
 		arrayListTokens=new ArrayList<Token>();
-		chaine = nvChaine;
+		parser = new Parser();
+		arrayListRecord = new ArrayList<HashMap<String, Variable>>();
+		arrayListRecord.add(new HashMap<String, Variable>());
+	}
+
+	public ArrayList<HashMap<String, Variable>> getRecord() {
+		return this.arrayListRecord;
 	}
 	
-	public void makeTokens() {
+	private void makeTokens(String chaine) {
 		String parse = "";
 		for (int i=0; i < chaine.length() ; i++) {
 			char chr = chaine.charAt(i);
@@ -70,8 +78,40 @@ public class Code implements ListeMots{
 		}
 	}//makeTokens
 	
-	public String toString() {
-		return variablesGlobales.toString();
+	@SuppressWarnings("unchecked")
+	public Object execLigne(String chaine){//solution potentielle : copier ce qui est à envoyer dans une variable, puis assigner dans tab
+		indice++;
+		arrayListRecord.add(arrayListRecord.get(indice-1));
+		makeTokens(chaine);
+		ligne=arrayListTokens;
+		if (0 == arrayListTokens.size())
+			return "Fin d'exécution";
+		else {
+			while (0 < arrayListTokens.size() && !arrayListTokens.get(0).getNom().equals(";")){
+				ligne.add(arrayListTokens.get(0));
+				arrayListTokens.remove(0);
+			}
+			if (0 == arrayListTokens.size() || !arrayListTokens.get(0).getNom().equals(";"))
+				return "Ligne finie sans ';'";
+			arrayListTokens.remove(0);//suppression du token ';'
+			
+			HashMap<String, Variable> temp = new HashMap<String, Variable>();
+			temp.putAll(arrayListRecord.get(indice));
+			
+			Object resultat = parser.execution(ligne, temp);
+
+			if (resultat instanceof HashMap<?, ?>) {
+				arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);
+				return (HashMap<String, Variable>)resultat;//variables à afficher dans la mémoire de l'interface
+			}
+			else 
+				return resultat.toString();// erreur à afficher dans la console de l'interface
+		}
+	}
+	
+	public HashMap<String, Variable> backLine() {
+		arrayListRecord.remove(indice--);
+		return arrayListRecord.get(indice);
 	}
 	
 	@Override
@@ -101,7 +141,7 @@ public class Code implements ListeMots{
 		return isType(token);
 	}
 	
-	public static boolean isInt(String str) {
+	public boolean isInt(String str) {
 		 
         if (str == null || str.length() == 0) {
             return false;
@@ -234,10 +274,6 @@ public class Code implements ListeMots{
 	
 	public ArrayList<Token> getTokens(){
 		return this.arrayListTokens;
-	}
-	
-	public HashMap<String, Variable> getVariablesGlobales (){
-		return this.variablesGlobales;
 	}
 	
 }

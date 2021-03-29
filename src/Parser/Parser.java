@@ -9,14 +9,15 @@ public class Parser{
 	private HashMap<String, Variable> variables;
 	private ArrayList<Token> ligne;
 	
-	public Parser(HashMap<String, Variable> variables) {
-		this.variables = variables;
-		this.ligne = new ArrayList<Token>();
+	public Parser() {
+		variables = new HashMap<String, Variable>();
+		ligne = new ArrayList<Token>();
 	}
 	
-	public Object execution(ArrayList<Token> nvLigne) {
+	public Object execution(ArrayList<Token> nvLigne, HashMap<String, Variable> nvVariables) {
+		variables= nvVariables;
 		ligne=nvLigne;
-		if (nvLigne.get(0) instanceof Type) {
+		if (ligne.get(0) instanceof Type) {
 			if (ligne.get(1) instanceof Variable) {
 				boolean ok = declareVariable((Variable)ligne.get(1));
 				if (!ok)
@@ -28,7 +29,7 @@ public class Parser{
 					return variables;
 				}
 			}
-			else return "Variable attentue après une déclaration de type";
+			else return "Variable attendue après une déclaration de type";
 		}
 		else if (ligne.get(0) instanceof Variable) {
 			if (!existe(ligne.get(0)))
@@ -149,6 +150,7 @@ public class Parser{
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
 						return resultat.toString();
+//					else if (nomFonction.equals("printf"))
 					ligne.set(i, new Constante(resultat));
 				}
 				else if (!(i<fin))//programme terminé
@@ -296,8 +298,10 @@ public class Parser{
 				if (i==0 || !(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
 					String error = calculParentheses(i);
+					//ici ajouter fonction
 					if (!error.equals(""))
 						return String.valueOf(error);
+					
 				}
 				else i++;
 			}
@@ -310,9 +314,10 @@ public class Parser{
 		int i=debut;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
-				if (!(ligne.get(i-1) instanceof TokenFonction))
+				if (!(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
 					calculParentheses(i);
+				}
 			}
 			else if (ligne.get(i).getNom().equals(")")) {
 				ligne.remove(i);

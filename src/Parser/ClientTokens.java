@@ -1,20 +1,25 @@
 package Parser;
 
+import java.util.ArrayList;
+
+import Tokens.Token;
+
 public class ClientTokens {
 
 	public static void main(String []args) {
 		
-		String a = "int a=2; int b=3; a+=b;";//5.5 variable, changer en constante
-		Code code = new Code(a);
-		code.makeTokens();
-		SousFonction fonction = new SousFonction(code.getTokens());
-		int i=0;
-		boolean cont=true;
-		while (cont && i++!=3) {
-			Object b =fonction.execLigneSuivante();
-			System.out.println(b.toString()+"\n");
-			if (b instanceof String) cont=false;
+		Code code = new Code();
+		ArrayList<String> test = new ArrayList<String>();
+		test.add("int a=pow((2*2),2);");
+		/*test.add("int b=a*5;");
+		test.add("int c=pow(pow(1,1),b);");
+		test.add("int d=c-5*a;");
+		test.add("a++;");*/
+		
+		for (int i=0;i<test.size();i++) {
+			System.out.println(code.execLigne(test.get(i)));
 		}
+		System.out.println(code.getRecord());
 	}
 		
 }

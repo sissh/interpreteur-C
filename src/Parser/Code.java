@@ -7,7 +7,6 @@ import Tokens.*;
 public class Code implements ListeMots{
 	
 	private Parser parser;
-	private ArrayList<Token> ligne;
 	private ArrayList<Token> arrayListTokens;
 	private ArrayList<HashMap<String, Variable>> arrayListRecord;
 	public int indice=0;
@@ -83,22 +82,17 @@ public class Code implements ListeMots{
 		indice++;
 		arrayListRecord.add(arrayListRecord.get(indice-1));
 		makeTokens(chaine);
-		ligne=arrayListTokens;
 		if (0 == arrayListTokens.size())
 			return "Fin d'exécution";
 		else {
-			while (0 < arrayListTokens.size() && !arrayListTokens.get(0).getNom().equals(";")){
-				ligne.add(arrayListTokens.get(0));
-				arrayListTokens.remove(0);
-			}
-			if (0 == arrayListTokens.size() || !arrayListTokens.get(0).getNom().equals(";"))
+			if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
 				return "Ligne finie sans ';'";
-			arrayListTokens.remove(0);//suppression du token ';'
+			arrayListTokens.remove(arrayListTokens.size()-1);//suppression du token ';'
 			
 			HashMap<String, Variable> temp = new HashMap<String, Variable>();
 			temp.putAll(arrayListRecord.get(indice));
 			
-			Object resultat = parser.execution(ligne, temp);
+			Object resultat = parser.execution(arrayListTokens, temp);
 
 			if (resultat instanceof HashMap<?, ?>) {
 				arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);

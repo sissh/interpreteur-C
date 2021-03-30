@@ -74,7 +74,7 @@ public class Code implements ListeMots{
 				else i++;
 					
 			}
-			else if (arrayListTokens.get(i).getClass() == Variable.class) {// une fonction était de type variable, devient TokenFonction
+			else if (arrayListTokens.get(i) instanceof Variable) {// une fonction était de type variable, devient TokenFonction
 				if (arrayListTokens.get(i+1).getNom().equals("(")) {
 					arrayListTokens.set(i, new TokenFonction(arrayListTokens.get(i).getNom()));
 				}

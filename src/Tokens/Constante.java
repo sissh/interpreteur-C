@@ -2,6 +2,11 @@ package Tokens;
 
 import Parser.ListeMots;
 
+/**
+ * Ce Token est une contante dans le code. Exemple : dans "int a=5;", 5 est une constante
+ * @author alexi
+ *
+ */
 public class Constante extends Token{
 	private Object valeur;
 	

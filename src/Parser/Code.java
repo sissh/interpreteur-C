@@ -22,6 +22,14 @@ public class Code implements ListeMots{
 		return this.arrayListRecord;
 	}
 	
+	public void reset() {
+		arrayListTokens=new ArrayList<Token>();
+		parser = new Parser();
+		arrayListRecord = new ArrayList<HashMap<String, Variable>>();
+		arrayListRecord.add(new HashMap<String, Variable>());
+		indice=0;
+	}
+	
 	private void makeTokens(String chaine) {
 		String parse = "";
 		for (int i=0; i < chaine.length() ; i++) {

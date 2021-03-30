@@ -20,7 +20,17 @@ public class ClientTokens {
 		for (int i=0;i<test.size();i++) {
 			System.out.println(code.execLigne(test.get(i)));
 		}
-		System.out.println(code.getRecord());
+		/*System.out.println("record  :"+code.getRecord());
+		code.backLine();
+		System.out.println("record  :"+code.getRecord());
+		System.out.println(code.execLigne("a=2;"));*/
+		System.out.println("record  :"+code.getRecord());
+		code.reset();
+		for (int i=0;i<test.size();i++) {
+			System.out.println(code.execLigne(test.get(i)));
+		}
+		System.out.println("record  :"+code.getRecord());
+		
 	}
 		
 }

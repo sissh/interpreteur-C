@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * Classe qui détaille comment la table est créée et définit certaines méthodes.
+ * Classe qui détaille comment la table est crée et définit certaines méthodes.
  * @author kosin
  *
  */
@@ -22,13 +22,13 @@ public class Memory extends DefaultTableModel {
 	public Memory() {
 		
 	this.setColumnIdentifiers(INTITULEES) ;
-	this.setRowCount (1) ;
+	this.setRowCount(0) ;
 	this.setColumnCount(4) ;
 	
 	
 	/**for (int i= 0 ;i < INTITULEES.length ; i++) 
 		this.setValueAt(INTITULEES[i],ligne,i);*/
-	setValue(INTITULEES) ;
+	//setValue(INTITULEES) ;
 	
 	}
 	

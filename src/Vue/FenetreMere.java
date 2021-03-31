@@ -1,6 +1,9 @@
 package Vue;
 
-import javax.lang.model.type.UnknownTypeException;
+
+import Parser.Code;
+import Tokens.Variable;
+
 import javax.swing.* ;
 
 import javax.swing.text.* ;
@@ -9,12 +12,11 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import java.awt.* ;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
- * La classe qui va créer l'interface graphique de l'application, à partir de différents composants graphiques.
+ * La classe qui va créée l'interface graphique de l'application, à partir de différents composants graphiques.
  * @see Vue.ConsoleAndMemory
  * @see Vue.Memory
  * @author Kosin
@@ -127,6 +129,12 @@ public class FenetreMere extends JFrame implements ActionListener{
 	 */
 	String EntreeScanf ;
 	
+	static Code codeObjet ;
+	
+	Object valeurRetour ;
+	
+	HashMap<String, Variable> valeurLecture ;
+	
 	
 	/**
 	 * Valeurs de tests
@@ -211,16 +219,9 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 		
 		InterfaceC.setSize(500,500) ;
-		InterfaceC.setText("#include <stdio.h>\r\n" + 
-				"\r\n" + 
-				"int main(void)\r\n" + 
-				"{\r\n" + 
-				"	char a[15] = \"Hello world\" ;\r\n" + 
-				"	int chiffre = 18 ;\r\n" + 
-				"	printf(\"%s\\n\", a) ;\r\n" + 
-				"	printf(\"Welcome in the wonderful world of C%d programing\\n\", chiffre);\r\n" + 
-				"	return 0;\r\n" + 
-				"} ");
+		InterfaceC.setText("int a = 15 ;\n"+
+		"int b = 10 ;\n" +
+		"int c = 154 ;\n");
 		
 		
 		
@@ -277,19 +278,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		return new Insets (40,40,40,40);
 	} CECI CREE UNE FENETRE EN ARRIRE PLAN */ 
 
-	/**
-	 * Méthode principale qui execute et crée une fenetre.
-	 * @param args String[] qui contient le nom de la fenetre.
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		FenetreMere fenetre = new FenetreMere("Interpréteur C") ;
-		fenetre.setResizable(false);
-		ajoutTable(VALEURS_TEST);
 
-		
-
-	}
 	
 	/**
 	 * Méthode qui ajoute une ligne à la table.
@@ -304,8 +293,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 	 * Méthode qui fait une lecture complète du code, afin de reperer chauque début de ligne et l'enregistre dans le champs refDebutLigne.
 	 */
 	private void ListeRepere(){
-		indiceLecturePrec = indiceLecture ;
-		
+		indiceLecture = 0 ;		
 		for(int k = 0; k < getNbLigne() ; k++ ) {
 		String text = "" ;
 		refDebutLigne.add(indiceLecture) ;
@@ -322,9 +310,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 		}
 	}
-		
-		indiceLecture = indiceLecturePrec ;
-		
+		indiceLecture = 0 ;	
 	}
 	
 	/**
@@ -334,7 +320,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 	public void getLigne() throws BadLocationException {
 		String text = "" ;
 		String ligne = "";
-		if(InterfaceC.getText() != "" && InterfaceC.getText().length() != 0 ) {
+		if(InterfaceC.getText() != "" && InterfaceC.getText().length() > 0 ) {
 			text = InterfaceC.getText() ;
 		
 			
@@ -347,19 +333,47 @@ public class FenetreMere extends JFrame implements ActionListener{
 			ligne += String.valueOf(text.charAt(indiceLecture)) ;
 			indiceLecture ++ ;
 		}
-		InterfaceC.getHighlighter().addHighlight(iteration, indiceLecture+1, couleurHighlight) ;
-		
+		ligne += String.valueOf(text.charAt(indiceLecture)) ;
 		indiceLecture ++ ;
-		
+		InterfaceC.getHighlighter().addHighlight(iteration, indiceLecture, couleurHighlight) ;
 		iteration = indiceLecture+1 ;
 		
-		}
 		
+		
+		valeurRetour = codeObjet.execLigne(ligne) ;
+		if( valeurRetour instanceof String) {
+			indiceLecture = 0 ;
+			ligneActive =  0;
+			iteration = 0 ;
+			codeObjet.reset();
+			affichePrintf(/*codeObjet.toString()*/(String)valeurRetour , 1) ;
+			ConsoleMemoire.getMemory().setRowCount(0) ;
+			InterfaceC.getHighlighter().removeAllHighlights();
+			InterfaceC.setEditable(true);
+			BackExecute.setVisible(false);
+		}
+		else {
+			valeurLecture = (HashMap<String, Variable>)valeurRetour ;
+			String[] valeur = new String[4] ;
+			for(String i : valeurLecture.keySet()) {
+			valeur[0] = nextIndice() ;
+			valeur[1] = i ;
+			valeur[2] = valeurLecture.get(i).getType().getNom() ;
+			valeur[3] = String.valueOf(valeurLecture.get(i).getValeur()) ;
+			ajoutTable(valeur) ;
+		}
+		}
 		System.out.println(ligne) ;
 		if(ligneActive == 1) {
 			BackExecute.setVisible(false) ;
 		}
+		}
+		
 	}
+	
+	
+	
+	
 	
 	/**
 	 * Méthode qui renvoie le nombre de ligne totale du code entré.
@@ -378,7 +392,11 @@ public class FenetreMere extends JFrame implements ActionListener{
 	}
 	
 
-	
+	/**
+	 * Méthode qui affiche un texte dans la console (ConsoleMemoire)
+	 * @param message String qui correspond au message à écrire
+	 * @param type int qui indique si c'est une erreur ou un message classique
+	 */
 	public static void affichePrintf(String message, int type){
 		if(type == 0) {
 			ConsoleMemoire.afficheMessage(ConsoleMemoire.getConsole(),message) ;
@@ -400,6 +418,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			indiceLecture = 0 ;
 			ligneActive =  0;
 			iteration = 0 ;
+			codeObjet.reset();
 			ConsoleMemoire.getMemory().setRowCount(0) ;
 			InterfaceC.getHighlighter().removeAllHighlights();
 			InterfaceC.setEditable(true);
@@ -427,7 +446,6 @@ public class FenetreMere extends JFrame implements ActionListener{
 			iteration = indiceLecture ;
 			try {
 				getLigne();
-				System.out.println(indiceLecture) ;
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -451,7 +469,6 @@ public class FenetreMere extends JFrame implements ActionListener{
 				}
 				try {
 					getLigne();
-					System.out.println(indiceLecture) ;
 				} catch (BadLocationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -477,6 +494,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			iteration = 0 ;
 			InterfaceC.setText("");
 		}
+	  
 		else if(event.getActionCommand() == "enter") {
 			EntreeScanf = InputT.getText() ;
 			affichePrintf(EntreeScanf, 0) ;
@@ -484,5 +502,18 @@ public class FenetreMere extends JFrame implements ActionListener{
 	}
 
 
-	}	
+	}
+	/**
+	 * Méthode principale qui execute et crée une fenetre.
+	 * @param args String[] qui contient le nom de la fenetre.
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		codeObjet = new Code() ;
+		FenetreMere fenetre = new FenetreMere("Interpréteur C") ;
+		fenetre.setResizable(false);
+
+		
+
+	}
 }

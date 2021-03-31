@@ -18,7 +18,7 @@ public class ClientTokens {
 		
 		Code code = new Code();
 		ArrayList<String> test = new ArrayList<String>();
-		test.add("inta=pow((2    *2),    2);");
+		test.add("int a=pow(pow(2,2),2);");
 		/*test.add("int b=a*5;");
 		test.add("a=b%14;");
 		test.add("a=a+2*(3*2);");
@@ -27,7 +27,9 @@ public class ClientTokens {
 		test.add("a++;");*/
 		
 		for (int i=0;i<test.size();i++) {
-			System.out.println(code.execLigne(test.get(i)));
+			Object erreur =code.execLigne(test.get(i));
+			System.out.println(erreur);
+			if (erreur instanceof String) break;
 		}
 		/*System.out.println("record  :"+code.getRecord());
 		code.backLine();

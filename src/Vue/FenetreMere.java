@@ -352,11 +352,15 @@ public class FenetreMere extends JFrame implements ActionListener{
 			ligneActive =  0;
 			iteration = 0 ;
 			codeObjet.reset();
-			affichePrintf(/*codeObjet.toString()*/(String)valeurRetour , 1) ;
+			affichePrintf((String)valeurRetour , 1) ;
 			ConsoleMemoire.getMemory().setRowCount(0) ;
 			InterfaceC.getHighlighter().removeAllHighlights();
 			InterfaceC.setEditable(true);
 			BackExecute.setVisible(false);
+		}
+		else if(valeurRetour instanceof String && valeurRetour == Parser.Parser.FIN_EXEC) {
+			affichePrintf((String)valeurRetour , 0) ;
+			Execute.setVisible(false);
 		}
 		else {
 			valeurLecture = (HashMap<String, Variable>)valeurRetour ;
@@ -430,6 +434,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			ConsoleMemoire.getMemory().setRowCount(0) ;
 			InterfaceC.getHighlighter().removeAllHighlights();
 			InterfaceC.setEditable(true);
+			Execute.setVisible(true);
 			BackExecute.setVisible(false);
 			
 		}else if(event.getActionCommand() == "allExec") {
@@ -462,6 +467,8 @@ public class FenetreMere extends JFrame implements ActionListener{
 				e.printStackTrace();
 			}
 			}
+
+			Execute.setVisible(true);
 		}
 		else if(event.getActionCommand() == "ligne") {
 			ligneActive ++ ;

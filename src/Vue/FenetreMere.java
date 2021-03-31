@@ -148,9 +148,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 	
 	static String ERREUR = "\"Je pense donc je suis.\"" ;
 	
-	String testInterfaceC = "int a = 15 ;\n"+
-							" int b = 10 ;\n"+
-							" int c = 154 ;\n" ;
+	String testInterfaceC = "int a = 15 ;\n int b = 10 ;\nint c = 154 ;\n" ;
 	
 	
 	/**
@@ -318,33 +316,36 @@ public class FenetreMere extends JFrame implements ActionListener{
 	 * Méthode qui envoie une ligne du code C entré par l'utilisateur.
 	 * @throws BadLocationException si iteration superieur à indiceLecture+1.
 	 */
-	public void getLigne() throws BadLocationException {
+	public String getLigne() throws BadLocationException {
 		String text = "" ;
 		String ligne = "";
 		if(InterfaceC.getText() != "" && InterfaceC.getText().length() > 0 ) {
 			text = InterfaceC.getText() ;
-		
-			
 			text += ';' ;
-			
 			
 			
 			InterfaceC.getHighlighter().removeAllHighlights();
 		while(text.charAt(indiceLecture) != ';') {
-			//if(text.charAt(indiceLecture) == '\n') {
+			
 			char a = text.charAt(indiceLecture);
-			System.out.println((int)a) ;
+			System.out.println() ;
+			if((int)a != 10) {
 			ligne += String.valueOf(text.charAt(indiceLecture)) ;
-			//}
+			}
 			indiceLecture ++ ;
 		}
 		ligne += String.valueOf(text.charAt(indiceLecture)) ;
 		indiceLecture ++ ;
 		InterfaceC.getHighlighter().addHighlight(iteration, indiceLecture, couleurHighlight) ;
 		iteration = indiceLecture+1 ;
-		
-		
-		
+		}
+		return ligne ;
+	}
+		/**
+		 * Méthode qui lit la ligne et ajout les variables en mémoire
+		 * @param ligne
+		 */
+		public void lectureLigne(String ligne) {
 		valeurRetour = codeObjet.execLigne(ligne) ;
 		if( valeurRetour instanceof String) {
 			indiceLecture = 0 ;
@@ -368,15 +369,14 @@ public class FenetreMere extends JFrame implements ActionListener{
 			valeur[2] = valeurLecture.get(i).getType().getNom() ;
 			valeur[3] = String.valueOf(valeurLecture.get(i).getValeur()) ;
 			ajoutTable(valeur) ;
-		}
+			}
 		}
 		System.out.println(ligne) ;
 		if(ligneActive == 1) {
 			BackExecute.setVisible(false) ;
 		}
-		}
-		
-	}
+		}	
+	
 	
 	
 	
@@ -435,7 +435,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		}else if(event.getActionCommand() == "allExec") {
 			for(int k = 0; k < getNbLigne() ; k++ )
 				try {
-					getLigne();
+					lectureLigne(getLigne());
 				} catch (BadLocationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -456,6 +456,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 				iteration = indiceLecture ;
 				codeObjet.backLine();
 				getLigne();
+				ConsoleMemoire.getMemory().setRowCount(ConsoleMemoire.getMemory().getRowCount()-1);
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -478,7 +479,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 					BackExecute.setVisible(false);
 				}
 				try {
-					getLigne();
+					lectureLigne(getLigne());
 				} catch (BadLocationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -491,7 +492,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 				iteration = 0 ;
 				Indice = "0" ;
 				try {
-					getLigne();
+					lectureLigne(getLigne()) ;
 				} catch (BadLocationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

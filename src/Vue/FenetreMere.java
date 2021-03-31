@@ -139,8 +139,8 @@ public class FenetreMere extends JFrame implements ActionListener{
 	/**
 	 * Valeurs de tests
 	 */
-	static String [] VALEURS_TEST = {nextIndice(),"a","int","15","1564"} ;
-	static String [] VALEURS_TEST_DEUX = {nextIndice(),"b","string","abc"} ;
+	/*static String [] VALEURS_TEST = {nextIndice(),"a","int","15","1564"} ;
+	static String [] VALEURS_TEST_DEUX = {nextIndice(),"b","string","abc"} ;*/
 	
 	static String[] PHRASE = {"\"Tout le malheur des hommes vient d'un seule chose, qui est de ne pas savoir demeurer au repos dans une chambre.\"",
 			"\"Tout ce qui ne me tues pas, me rends plus fort.\"",
@@ -148,6 +148,9 @@ public class FenetreMere extends JFrame implements ActionListener{
 	
 	static String ERREUR = "\"Je pense donc je suis.\"" ;
 	
+	String testInterfaceC = "int a = 15 ;\n"+
+							" int b = 10 ;\n"+
+							" int c = 154 ;\n" ;
 	
 	
 	/**
@@ -219,9 +222,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 		
 		InterfaceC.setSize(500,500) ;
-		InterfaceC.setText("int a = 15 ;\n"+
-		"int b = 10 ;\n" +
-		"int c = 154 ;\n");
+		InterfaceC.setText(testInterfaceC);
 		
 		
 		
@@ -330,7 +331,11 @@ public class FenetreMere extends JFrame implements ActionListener{
 			
 			InterfaceC.getHighlighter().removeAllHighlights();
 		while(text.charAt(indiceLecture) != ';') {
+			//if(text.charAt(indiceLecture) == '\n') {
+			char a = text.charAt(indiceLecture);
+			System.out.println((int)a) ;
 			ligne += String.valueOf(text.charAt(indiceLecture)) ;
+			//}
 			indiceLecture ++ ;
 		}
 		ligne += String.valueOf(text.charAt(indiceLecture)) ;
@@ -355,6 +360,8 @@ public class FenetreMere extends JFrame implements ActionListener{
 		else {
 			valeurLecture = (HashMap<String, Variable>)valeurRetour ;
 			String[] valeur = new String[4] ;
+			ConsoleMemoire.getMemory().setRowCount(0) ;
+			Indice = "0";
 			for(String i : valeurLecture.keySet()) {
 			valeur[0] = nextIndice() ;
 			valeur[1] = i ;

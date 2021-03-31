@@ -14,6 +14,7 @@ public class Parser{
 	private ArrayList<Token> ligne;
 	String FIN_EXEC = "Fin d'exécution";
 	
+	
 	public Parser() {
 		variables = new HashMap<String, Variable>();
 		ligne = new ArrayList<Token>();

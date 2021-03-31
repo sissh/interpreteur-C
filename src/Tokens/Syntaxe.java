@@ -1,8 +1,18 @@
 package Tokens;
 
+/**
+ * Tout type d'éléments de syntaxe, virgule, parenthèse, point-virgule, etc
+ * Aucune utilisation du type de cette classe (comportement très varié entre les différents éléments), sert de catégorie par défaut
+ * @author alexi
+ *
+ */
 public class Syntaxe extends Token{
-	public Syntaxe(String nom) {
-		super(nom);
+	/**
+	 * Le constructeur de la classe
+	 * @param nvNom Le nom du Token
+	 */
+	public Syntaxe(String nvNom) {
+		super(nvNom);
 	}
 
 }

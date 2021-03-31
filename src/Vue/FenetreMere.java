@@ -14,7 +14,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 /**
- * La classe qui va créée l'interface graphique de l'application, à partir de différents composants graphiques.
+ * La classe qui va créer l'interface graphique de l'application, à partir de différents composants graphiques.
  * @see Vue.ConsoleAndMemory
  * @see Vue.Memory
  * @author Kosin

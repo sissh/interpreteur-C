@@ -3,6 +3,12 @@ import Tokens.Constante;
 import Tokens.Token;
 import Tokens.Variable;
 
+/**
+ * Interface pratique si l'on veut modifier ce que doit contenir un Token.
+ * Les méthodes ne sont utiles que pour la Classe {@link Parser.Code Code} il serait d'ailleurs plus propre de les supprimer de l'interface (fonctions publiques qui ne devraient pas l'être)
+ * @author alexi
+ *
+ */
 public interface ListeMots {
 
 	final String[] TYPES = {"char", "int", "void"};
@@ -12,7 +18,7 @@ public interface ListeMots {
 	final char[] SYNTAXE = {'(',')','{','}','[',']',';',','};
 	final char[] COMPARATEUR = {'!','<','>'};
 	final char EGAL = '=';
-	final String CONSTANTE = "###CONSTANTE###";
+	final String CONSTANTE = "#CONST#";
 	
 	public boolean isToken(String token);
 	public boolean isToken(char token);

@@ -4,24 +4,54 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import Tokens.*;
 
+/**
+ * Classe préparant l'exécution du Parser, en créant les Tokens, et qui gère la sauvegarde de la mémoire
+ * @author alexi
+ *
+ */
 public class Code implements ListeMots{
-	
-	private Parser parser;
-	private ArrayList<Token> arrayListTokens;
-	private ArrayList<HashMap<String, Variable>> arrayListRecord;
-	public int indice=0;
-	
-	public Code() {
-		arrayListTokens=new ArrayList<Token>();
-		parser = new Parser();
-		arrayListRecord = new ArrayList<HashMap<String, Variable>>();
-		arrayListRecord.add(new HashMap<String, Variable>());
-	}
 
+	/**
+	 * Objet Parser qui exécutera le code.
+	 */
+	private Parser parser;
+	/**
+	 * Liste de Tokens produite par {@link Parser.Code#makeTokens(String) makeTokens} (ligne de code), envoyée ensuite au Parser.
+	 */
+	private ArrayList<Token> arrayListTokens;
+	/**
+	 * Registre des différents états de la mémoire, pour permettre le retour en arrière.
+	 */
+	private ArrayList<HashMap<String, Variable>> arrayListRecord;
+	/**
+	 * indice correspondant à l'état de la mémoire en cours. Dispensable, car l'indice courant = arrayListRecord.size()-1 à tout moment.
+	 */
+	public int indice;
+	
+	/**
+	 * Constructeur de la classe, initialise les variables.
+	 */
+	public Code() {
+		
+		arrayListTokens=new ArrayList<Token>();//contient les tokens à envoyer au Parser
+		parser = new Parser();//Parser pour l'exécution du code
+		arrayListRecord = new ArrayList<HashMap<String, Variable>>();//Enregistre les différents états de la mémoire
+		arrayListRecord.add(new HashMap<String, Variable>());
+		indice=0;
+	}
+	
+	/**
+	 * Utilisé pour de la maintenance de code, mais peut avoir son utilité dans l'interface (pour accéder à des états antérieurs de la mémoire).
+	 * @return
+	 */
 	public ArrayList<HashMap<String, Variable>> getRecord() {
 		return this.arrayListRecord;
 	}
 	
+	/**
+	 * Remet à zéro l'objet Code, pour démarrer une nouvelle exécution.
+	 * Utilisé lorsque l'utilisateur appuie sur le bouton {@linkplain Vue.FenetreMere#actionPerformed(java.awt.event.ActionEvent) RESET}.
+	 */
 	public void reset() {
 		arrayListTokens=new ArrayList<Token>();
 		parser = new Parser();
@@ -30,24 +60,29 @@ public class Code implements ListeMots{
 		indice=0;
 	}
 	
+	/**
+	 * Conversion de la String envoyée par l'interface en une liste de Tokens (arrayListTokens)
+	 * @param chaine Texte converti
+	 */
 	private void makeTokens(String chaine) {
-		String parse = "";
+		String parse = "";//initialisation de cette variable, qui permet de distinguer les Tokens
 		for (int i=0; i < chaine.length() ; i++) {
-			char chr = chaine.charAt(i);
-			if (chr==' '){// si parse contient un objet, l'ajouter. Si c'est des espaces en trop, supprimer.
-				if (parse.equals(" ") || parse.equals("")) {
+			char chr = chaine.charAt(i);//parcours de la chaine caractère par caractère
+			if (chr==' '){// Les espaces délimitent les Tokens
+				if (parse.equals("") || parse.equals("\n")) {//si parse est vide ou retour à la ligne inutile, il n'y a pas de Token à créer (par exemple, suite d'espaces dans une ligne de code)
 					parse="";
 					continue;
 				}
-				else {
+				else {//sinon, alors le contenu de parse doit être un Token. Exemple : "int a = 5 ;", chaque token est séparé par un espace
 					arrayListTokens.add(differentiation(parse));
 					parse="";
 					continue;
 				}
 				
 			}
-			else if(isToken(chr)) {
-				arrayListTokens.add(differentiation(parse));
+			else if(isToken(chr)) {//Si le caractère est un token stéréotypé à lui tout seul, il faut arrêter Exemple : ";", ",", "(", etc
+				if (!parse.equals(""))
+						arrayListTokens.add(differentiation(parse));//le token précédent est dont un Token aussi
 				arrayListTokens.add(differentiation(chr));
 				parse="";
 				continue;
@@ -55,10 +90,10 @@ public class Code implements ListeMots{
 			parse+=chr;
 		}
 		int i=0;
-		while (i<arrayListTokens.size()) {//Supprime des tokens vides en trop, précise les types pour faciliter l'algorithme
+		while (i<arrayListTokens.size()) {//Supprime des tokens vides en trop (ne doit plus arriver normalement, tester et supprimer si ok)
 			if (arrayListTokens.get(i).getNom().equals(""))
-				arrayListTokens.remove(i); ///// rajouter + et + juxtaposé, + =, etc
-			else if (arrayListTokens.get(i).getNom().equals("+")) {
+				arrayListTokens.remove(i);
+			else if (arrayListTokens.get(i).getNom().equals("+")) {// rajouter + et + juxtaposé, opérateur unaire
 				if (arrayListTokens.get(i-1).getNom().equals("+")) {
 					arrayListTokens.remove(i);
 					arrayListTokens.set(i-1, new OpeUnaire("++"));
@@ -66,7 +101,7 @@ public class Code implements ListeMots{
 				else i++;
 					
 			}
-			else if (arrayListTokens.get(i).getNom().equals("-")) {
+			else if (arrayListTokens.get(i).getNom().equals("-")) {//idem pour --
 				if (arrayListTokens.get(i+2).getNom().equals("-")) {
 					arrayListTokens.remove(i+2);
 					arrayListTokens.set(i, new OpeUnaire("--"));
@@ -74,8 +109,8 @@ public class Code implements ListeMots{
 				else i++;
 					
 			}
-			else if (arrayListTokens.get(i) instanceof Variable) {// une fonction était de type variable, devient TokenFonction
-				if (arrayListTokens.get(i+1).getNom().equals("(")) {
+			else if (arrayListTokens.get(i) instanceof Variable) {// une fonction était de type variable (car ne se distingue pas sans vérification), devient TokenFonction
+				if (arrayListTokens.get(i+1).getNom().equals("(")) {// int pow=5 est une variable, mais pow(2,2) est une fonction
 					arrayListTokens.set(i, new TokenFonction(arrayListTokens.get(i).getNom()));
 				}
 				else i++;
@@ -91,7 +126,7 @@ public class Code implements ListeMots{
 		arrayListRecord.add(arrayListRecord.get(indice-1));
 		makeTokens(chaine);
 		if (0 == arrayListTokens.size())
-			return "Fin d'exécution";
+			return "Fin d'exécution";//Erreur si l'utilisateur appuie sur le bouton "ligne précédente" ?
 		else {
 			if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
 				return "Ligne finie sans ';'";

@@ -1,5 +1,8 @@
 package Tokens;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Ce Token est une variable dans le code. Exemple : dans "int a=5;", a est une constante
  * @author alexi
@@ -17,11 +20,11 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @param nvNom
+	 * @param nvNom Le nom du Token
 	 * @param nvValeur Valeur à attribuer à la variable. Toujours fournis comme null : permet de distinguer les constructeurs
 	 * @see Parser.ListeMots
-	 * @see Parser.Code.differentiation
-	 * @see Parser.Code.makeTokens En fin de fonction, conversion en TokenFonction possible
+	 * @see Parser.Code {@link Parser.Code#differentiation(String nom) differentiation} 
+	 * @see Parser.Code En fin de fonction {@link Parser.Code#makeTokens(String) makeTokens}, conversion en TokenFonction possible
 	 */
 	public Variable(String nvNom,Object nvValeur) {//
 		super(nvNom);
@@ -54,8 +57,7 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @param nvType Nouveau type de la variable, à n'utiliser qu'une fois, lors de la première utilisation de la variable
-	 * @see Parser.Parser.execution Au début
+	 * @param nvType Nouveau type de la variable
 	 */
 	public void setType(Type nvType) {
 		this.type=nvType;

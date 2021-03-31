@@ -3,7 +3,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import Tokens.*;
 
-
+/**
+ * Classe d'exécution du code
+ * @author alexi
+ *
+ */
 public class Parser{
 
 	private HashMap<String, Variable> variables;
@@ -93,7 +97,7 @@ public class Parser{
 		return variables;
 	}
 	
-	private Object execFonctions(int debut, int fin) {//de nombreuses erreurs à gérer
+	private Object execFonctions(int debut, int fin) {
 		int i=debut;
 		while (i<fin) {
 			if (ligne.get(i) instanceof TokenFonction) {
@@ -150,11 +154,8 @@ public class Parser{
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
 						return resultat.toString();
-//					else if (nomFonction.equals("printf"))
 					ligne.set(i, new Constante(resultat));
 				}
-				else if (!(i<fin))//programme terminé
-					return standardErrorMessage("(", ligne.get(i).getNom());
 				else return standardErrorMessage("(", ligne.get(i).getNom());
 			}
 			i++;
@@ -180,7 +181,7 @@ public class Parser{
 	private String errorCalculUnaire() {//si tentative d'incrémenter constantes
 		int i=0;
 		while (i<ligne.size()) {
-			if (!(ligne.get(i++) instanceof Variable)) {
+			if (!(ligne.get(i++) instanceof Variable)) {//double boucle inutile, on peut gérer les deux en même temps
 				if (i<ligne.size() && ligne.get(i) instanceof OpeUnaire) {
 					return "Tentative d'incrémenter un Token qui n'est pas une variable";
 				}
@@ -220,10 +221,10 @@ public class Parser{
 		}
 	}
 	
-	private Object calculLigne1 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+	private Object calculLigne1(int debut, int fin) {//calcul des multiplications, divisions, modulo
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
+		while (debut<fin && continuer) {
 			i=debut;
 			continuer = false;
 			while (i<fin) {
@@ -248,10 +249,10 @@ public class Parser{
 		return fin;
 	}
 	
-	private String calculLigne2 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+	private String calculLigne2(int debut, int fin) {//calcul des additions, soustractions
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
+		while (debut<fin && continuer) {
 			i=debut;
 			continuer = false;
 			while (i<fin) {

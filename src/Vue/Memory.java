@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * Classe qui détaille comment la table est crée et définit certaines méthodes.
+ * Classe qui détaille comment la table est créée et définit certaines méthodes.
  * @author kosin
  *
  */

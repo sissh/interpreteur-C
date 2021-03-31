@@ -418,6 +418,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			indiceLecture = 0 ;
 			ligneActive =  0;
 			iteration = 0 ;
+			Indice = "0" ;
 			codeObjet.reset();
 			ConsoleMemoire.getMemory().setRowCount(0) ;
 			InterfaceC.getHighlighter().removeAllHighlights();
@@ -437,14 +438,16 @@ public class FenetreMere extends JFrame implements ActionListener{
 			indiceLecture = 0 ;
 			ligneActive =  0;
 			iteration = 0 ;
+			Indice = "0" ;
 			
 		}
 		else if(event.getActionCommand() == "backLigne") {
 			if(ligneActive >= 1) {
-			ligneActive -= 1 ;
-			indiceLecture = refDebutLigne.get(ligneActive-1) ;
-			iteration = indiceLecture ;
-			try {
+				try {
+				ligneActive -= 1 ;
+				indiceLecture = refDebutLigne.get(ligneActive-1) ;
+				iteration = indiceLecture ;
+				codeObjet.backLine();
 				getLigne();
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
@@ -479,6 +482,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 				indiceLecture = 0 ;
 				ligneActive =  1;
 				iteration = 0 ;
+				Indice = "0" ;
 				try {
 					getLigne();
 				} catch (BadLocationException e) {

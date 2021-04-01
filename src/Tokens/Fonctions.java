@@ -2,6 +2,8 @@ package Tokens;
 
 import java.util.ArrayList;
 
+import com.sun.net.httpserver.Filter.Chain;
+
 import Vue.FenetreMere;
 
 public class Fonctions {
@@ -88,7 +90,7 @@ public class Fonctions {
 			
 			if (phrase.charAt(i) == '%') {		//Détection d'un %
 				
-				if (i < phrase.length() - 1 && testVariablePrint(phrase.charAt(i+1))) {		//Vérifie si le charactère qui suit % fait parti de ceux appelant un argument
+				if (i < phrase.length() - 1 && testVariable(phrase.charAt(i+1), arguments[argCourant])) {		//Vérifie si le charactère qui suit % fait parti de ceux appelant un argument
 					if (nbTrigger > 0) {
 						phrase = phrase.substring(0, i) + arguments[argCourant].toString() + phrase.substring(i+2);	//Découpe du String :
 						argCourant += 1;									//On coupe jusqu'à avant le %, on concatène l'argument puis le reste de la phrase
@@ -117,10 +119,23 @@ public class Fonctions {
 		
 	}
 
-//Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant
-	private static boolean testVariablePrint (char ch1) { 
+//Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant et vérifiant le type de variable correspondant
+	private static boolean testVariable (char ch1, Object arg) { 
 			switch (ch1) {
-				case 'd','s','c','f','n':return true;		//TODO: Trier par type IMPORTANT
+				case 'd' :
+					if (arg instanceof Integer) {return true;}
+					else; return false;
+				
+				case 's':
+					if (arg instanceof String) {return true;}
+					else; return false;
+				case 'c':
+					if (arg instanceof Character) {return true;}
+					else; return false;
+				case 'f':
+					if (arg instanceof Float) {return true;}
+					else; return false;
+
 				default:return false;
 			}
 	}

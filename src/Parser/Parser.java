@@ -111,9 +111,14 @@ public class Parser{
 					ArrayList <Object> parametres = new ArrayList <Object>();
 					int j=0;
 					while (i+j<fin && !ligne.get(i+j).getNom().equals(")")) {//gestion des fonctions imbriquées : compter les parentheses
-						
-						while (i+j<fin && !ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")"))//erreur potentielle si pow(,5) par ex
+						int nbParentheses=0;
+						while (i+j<fin && (nbParentheses>0 || (!ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")")))){//erreur potentielle si pow(,5) par ex
+							if (ligne.get(i+j).getNom().equals("("))
+								nbParentheses++;
+							else if (ligne.get(i+j).getNom().equals(")"))
+								nbParentheses--;
 							j++;
+						}
 						System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
 						if (i+j==fin)
 							return standardErrorMessage("paramètre", "rien");

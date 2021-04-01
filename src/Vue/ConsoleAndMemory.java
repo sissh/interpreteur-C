@@ -46,6 +46,7 @@ public class ConsoleAndMemory extends JPanel {
 		memoire.setDragEnabled(false);
 		memoire.setFocusable(false);
 		memoire.setCellSelectionEnabled(false);
+		memoire.getTableHeader().setReorderingAllowed(false);
 
 		
 		

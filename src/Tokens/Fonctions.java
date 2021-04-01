@@ -2,6 +2,8 @@ package Tokens;
 
 import java.util.ArrayList;
 
+import Vue.FenetreMere;
+
 public class Fonctions {
 
 //Cette méthode reçoit le nom de la fonction demandées et ses arguments: elle vérifie la validité des arguments et exécute la fonction demandée	
@@ -72,16 +74,14 @@ public class Fonctions {
 	
 	
 //Fonction printf du C	
-	public static char[] print(Object [] arguments) {			
+	public static int print(Object [] arguments) {			
 		String phrase = arguments[0].toString();								//La fonction travail avec des String, pour la méthode subString()
-		String erreur1 = "Erreur : trop d'appel d'arguments";								//Gestion d'erreur à l'interieur de print :
-		String erreur2 = "Erreur : pas assez d'arguments en paramètres";						//Impossible pour execFonction de savoir s'il y a trop ou pas assez de %
+		String erreur1 = "Erreur : trop d'appel d'arguments.";								//Gestion d'erreur à l'interieur de print :
+		String erreur2 = "Erreur : trop d'arguments en paramètre.";									//Impossible pour execFonction de savoir s'il y a trop ou pas assez de %
 		int argCourant = 1;
 		int i = 0;
 		int nbArgs = arguments.length - 1;										//Compte le nb d'arguments
 		int nbTrigger = nbArgs;														//Compte le nb de % détectés par la fonction: on part du principe qu'il y en aura autant que d'args
-		char [] resultatCharArray = new char[phrase.length() + arguments.length];			//Array de char du resultat
-		char [] erreurCharArray = new char [erreur2.length()];								//Array de char du msg d'erreur
 		
 
 		while (i < phrase.length()-1) {			//Parcours de la phrase: taille variable car elle est changée quand on trouve des %
@@ -102,25 +102,18 @@ public class Fonctions {
 		}
 		
 		if (nbTrigger == 0) {							//Si il y a bien autant d'appel d'arguments que d'arguments, on renvoie le resultat
-			for (int j = 0; j < phrase.length(); j++) {		//conversion du String en charArray
-				resultatCharArray[j] = phrase.charAt(j);		
-			}
-			return resultatCharArray;
+			FenetreMere.printf(phrase, 0);
 		}
 		
 		else if (nbTrigger < 0) {							//S'il y a plus d'appel d'arguments que d'arguments, on renvoi une erreur
-			for (int e1 = 0; e1 < erreur1.length(); e1++) {
-				erreurCharArray[e1] = erreur1.charAt(e1);
-			}
-			return erreurCharArray;
+			FenetreMere.printf(erreur1, 1);
 		}
 		
 		else {													//S'il y a moins d'appel d'arguments que d'arguments, on renvoi une erreur
-			for (int e2 = 0; e2 < erreur2.length(); e2++) {
-				erreurCharArray[e2] = erreur2.charAt(e2);
-			}
-			return erreurCharArray;
+			FenetreMere.printf(erreur2, 1);
 		}
+		
+		return phrase.length();
 		
 	}
 

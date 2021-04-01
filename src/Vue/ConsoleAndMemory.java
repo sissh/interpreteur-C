@@ -24,7 +24,7 @@ public class ConsoleAndMemory extends JPanel {
 	
 	
 	/**
-	 * Constructeur de la classe qui créer la console et la table "mémoire" et les fusionnent en une entité.
+	 * Constructeur de la classe qui crée la console et la table "mémoire" et les fusionnent en une entité.
 	 */
 	public ConsoleAndMemory() {
 		
@@ -46,6 +46,7 @@ public class ConsoleAndMemory extends JPanel {
 		memoire.setDragEnabled(false);
 		memoire.setFocusable(false);
 		memoire.setCellSelectionEnabled(false);
+		memoire.getTableHeader().setReorderingAllowed(false);
 
 		
 		
@@ -143,7 +144,7 @@ public class ConsoleAndMemory extends JPanel {
  }
 	
 	/**
-	 * Méthode qui permet d'obtenir le champ memory.
+	 * Méthode qui permet d'obtenir le champ console.
 	 * @return console JTextPane qui est le champ console.
 	 */
 	public JTextPane getConsole() {

@@ -3,12 +3,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import Tokens.*;
 
-
+/**
+ * Classe d'exécution du code
+ * @author alexi
+ *
+ */
 public class Parser{
 
 	private HashMap<String, Variable> variables;
 	private ArrayList<Token> ligne;
-	
+	public static String FIN_EXEC = "Fin d'exécution";
+
 	public Parser() {
 		variables = new HashMap<String, Variable>();
 		ligne = new ArrayList<Token>();
@@ -17,6 +22,8 @@ public class Parser{
 	public Object execution(ArrayList<Token> nvLigne, HashMap<String, Variable> nvVariables) {
 		variables= nvVariables;
 		ligne=nvLigne;
+		if (ligne.size()==0)
+			return FIN_EXEC;
 		if (ligne.get(0) instanceof Type) {
 			if (ligne.get(1) instanceof Variable) {
 				boolean ok = declareVariable((Variable)ligne.get(1));
@@ -69,14 +76,14 @@ public class Parser{
 			return "Token "+ligne.get(0).getNom()+" inattendu, le programme devait trouver un \"=\"";
 		ligne.remove(0);
 
-		String erreur=errorCalculUnaire();
-		if (!erreur.equals(""))
-			return erreur;
+		Object erreur=errorCalculUnaire();
+		if (erreur instanceof String)
+			return erreur.toString();
 		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
 		calculUnairePrefixe();
 		erreur = initCalcul();
-		if (!erreur.equals(""))
-			return erreur;
+		if (erreur instanceof String)
+			return erreur.toString();
 		if (ligne.size()!=1)
 			return "Erreur lors de l'exécution";
 		
@@ -93,16 +100,45 @@ public class Parser{
 		return variables;
 	}
 	
-	private Object execFonctions(int debut, int fin) {//de nombreuses erreurs à gérer
+	private Object execFonctions(int debut, int fin) {
 		int i=debut;
+		//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i);
 		while (i<fin) {
-			if (ligne.get(i) instanceof TokenFonction) {
-				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1;
-				if (i<fin && ligne.get(i).getNom().equals("(")) {
+			if (ligne.get(i) instanceof TokenFonction) {//faire calculLigne entre chaque virgule au lieu de gerer les cas particuliers
+				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1; //plus besoin donc de s'occuper des fonctions imbriquees
+				if (i<fin && ligne.get(i).getNom().equals("(")) { //il faut gerer la valeur de fin cependant, qui va changer
 					ligne.remove(i); fin-=1;
 					ArrayList <Object> parametres = new ArrayList <Object>();
-					while (i<fin && !ligne.get(i).getNom().equals(")")) {
-						if (ligne.get(i) instanceof Variable) {
+					int j=0;
+					while (i+j<fin && !ligne.get(i+j).getNom().equals(")")) {//gestion des fonctions imbriquées : compter les parentheses
+						int nbParentheses=0;
+						while (i+j<fin && (nbParentheses>0 || (!ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")")))){//erreur potentielle si pow(,5) par ex
+							if (ligne.get(i+j).getNom().equals("("))
+								nbParentheses++;
+							else if (ligne.get(i+j).getNom().equals(")"))
+								nbParentheses--;
+							j++;
+						}
+						System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
+						if (i+j==fin)
+							return standardErrorMessage("paramètre", "rien");
+						else if (ligne.get(i+j).getNom().equals(",") || ligne.get(i+j).getNom().equals(")")) {//autres cas possibles ?
+							Object nvFin = calculLigne(i,i+j-1);//peut-être inutile
+							System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j+" nvFin : "+nvFin);
+							if (nvFin instanceof String)
+								return nvFin.toString();
+							else if ((int)nvFin!=i)
+								return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";
+							fin-=j;
+							parametres.add(getTokenValeur(ligne.get(i)));
+							ligne.remove(i);
+							if (ligne.get(i).getNom().equals(","))
+								ligne.remove(i);
+							else
+								fin--;
+							j=0;
+						}
+						/*if (ligne.get(i) instanceof Variable) {
 							parametres.add(getTokenValeur(ligne.get(i)));
 							ligne.remove(i); fin-=1;
 							if (i==ligne.size())
@@ -144,17 +180,18 @@ public class Parser{
 							else if(!ligne.get(i).getNom().equals(")"))
 								return standardErrorMessage(")", ligne.get(i).getNom());
 						}
-						else return standardErrorMessage("paramètre", ligne.get(i).getNom());
+						else return standardErrorMessage("paramètre", ligne.get(i).getNom());*/
 						
 					}
+					System.out.println(ligne+" fin : "+fin+" i : "+i);
+					if (i==fin && !ligne.get(i).getNom().equals(")"))
+						return standardErrorMessage("paramètre' ou ')", "rien");
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
 						return resultat.toString();
-//					else if (nomFonction.equals("printf"))
-					ligne.set(i, new Constante(resultat));
+					ligne.set(i, new Constante(resultat));// à la place du Token ')'
+					
 				}
-				else if (!(i<fin))//programme terminé
-					return standardErrorMessage("(", ligne.get(i).getNom());
 				else return standardErrorMessage("(", ligne.get(i).getNom());
 			}
 			i++;
@@ -177,10 +214,10 @@ public class Parser{
 		return variablesAIncrementer;
 	}
 	
-	private String errorCalculUnaire() {//si tentative d'incrémenter constantes
+	private Object errorCalculUnaire() {//si tentative d'incrémenter constantes
 		int i=0;
 		while (i<ligne.size()) {
-			if (!(ligne.get(i++) instanceof Variable)) {
+			if (!(ligne.get(i++) instanceof Variable)) {//double boucle inutile, on peut gérer les deux en même temps
 				if (i<ligne.size() && ligne.get(i) instanceof OpeUnaire) {
 					return "Tentative d'incrémenter un Token qui n'est pas une variable";
 				}
@@ -196,7 +233,7 @@ public class Parser{
 				else i++;
 			}
 		}
-		return "";
+		return null;
 	}
 	
 	private String verifNullVariables() {
@@ -204,7 +241,7 @@ public class Parser{
 			if (ligne.get(i) instanceof Variable && getTokenValeur(ligne.get(i))==null)
 				return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant.";
 		}
-		return "";
+		return null;
 	}
 	
 	private void calculUnairePrefixe(){
@@ -220,10 +257,10 @@ public class Parser{
 		}
 	}
 	
-	private Object calculLigne1 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+	private Object calculLigne1(int debut, int fin) {//calcul des multiplications, divisions, modulo
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
+		while (debut<fin && continuer) {//erreurs potentielles si tokens en trop, à verifier
 			i=debut;
 			continuer = false;
 			while (i<fin) {
@@ -248,10 +285,10 @@ public class Parser{
 		return fin;
 	}
 	
-	private String calculLigne2 (int debut, int fin) {//calcul des multiplications, divisions, modulo
+	private Object calculLigne2(int debut, int fin) {//calcul des additions, soustractions
 		int i;
 		boolean continuer=true;
-		while (debut<fin && continuer) {//simplification : token.getValeur, au lieu de cas particulier
+		while (debut<fin && continuer) {
 			i=debut;
 			continuer = false;
 			while (i<fin) {
@@ -273,10 +310,10 @@ public class Parser{
 				else i++;
 			}
 		}
-		return "";
+		return fin;
 	}
 	
-	private String calculLigne(int debut, int fin) {
+	private Object calculLigne(int debut, int fin) {
 		Object erreur = execFonctions(debut, fin);
 		if (erreur instanceof String)
 			return String.valueOf(erreur);
@@ -288,19 +325,19 @@ public class Parser{
 		return calculLigne2(debut,nvFin);
 	}
 	
-	private String initCalcul() {
-		String verif = verifNullVariables(); 
-		if (!verif.equals(""))
-			return verif;
+	private Object initCalcul() {
+		Object erreur = verifNullVariables(); 
+		if (erreur instanceof String)
+			return erreur.toString();
 		int i =0;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
 				if (i==0 || !(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
-					String error = calculParentheses(i);
-					//ici ajouter fonction
-					if (!error.equals(""))
-						return String.valueOf(error);
+					erreur = calculParentheses(i);
+					//ici ajouter fonction (??)
+					if (erreur instanceof String)
+						return erreur.toString();
 					
 				}
 				else i++;
@@ -310,13 +347,15 @@ public class Parser{
 		return calculLigne(0, ligne.size());
 	}
 	
-	private String calculParentheses(int debut) {
+	private Object calculParentheses(int debut) {
 		int i=debut;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
 				if (!(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
-					calculParentheses(i);
+					Object error = calculParentheses(i);
+					if (error instanceof String)
+						return error.toString();
 				}
 			}
 			else if (ligne.get(i).getNom().equals(")")) {

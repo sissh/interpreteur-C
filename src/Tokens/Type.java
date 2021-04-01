@@ -1,8 +1,17 @@
 package Tokens;
 
+/**
+ * Ce Token illustre un Type. Exemple : "int"
+ * @author alexi
+ *
+ */
 public class Type extends Token{
-	public Type(String nom) {
-		super(nom);
+	/**
+	 * Constructeur de la classe
+	 * @param nvNom Le nom du Token
+	 */
+	public Type(String nvNom) {
+		super(nvNom);
 	}
 
 }

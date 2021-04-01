@@ -12,7 +12,7 @@ public class Fonctions {
 		
 		switch(nomFonction) {			//Switch qui filtre les erreurs d'arguments et exécute les fonctions demandées: renvoi un msg d'erreur si arg invalide
 			case "pow":
-				if (arguments.length < 2) {							//Pas assez d'arguments
+				if (arguments.length < 2) {	//Pas assez d'arguments
 					return messageErreur(3);
 				}
 				

@@ -93,7 +93,7 @@ public class Fonctions {
 						phrase = phrase.substring(0, i) + arguments[argCourant].toString() + phrase.substring(i+2);	//Découpe du String :
 						argCourant += 1;									//On coupe jusqu'à avant le %, on concatène l'argument puis le reste de la phrase
 					}
-					nbTrigger--;	//Passe à la variable suivante; ajoute 1 au décompte de % trouvé.			
+					nbTrigger--;	//Passe à la variable suivante; ajoute 1 au décompte de % trouvé. 			
 				}
 				
 			}

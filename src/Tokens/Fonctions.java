@@ -102,15 +102,15 @@ public class Fonctions {
 		}
 		
 		if (nbTrigger == 0) {							//Si il y a bien autant d'appel d'arguments que d'arguments, on renvoie le resultat
-			FenetreMere.printf(phrase, 0);
+			FenetreMere.affichePrintf(phrase, 0);
 		}
 		
 		else if (nbTrigger < 0) {							//S'il y a plus d'appel d'arguments que d'arguments, on renvoi une erreur
-			FenetreMere.printf(erreur1, 1);
+			FenetreMere.affichePrintf(erreur1, 1);
 		}
 		
 		else {													//S'il y a moins d'appel d'arguments que d'arguments, on renvoi une erreur
-			FenetreMere.printf(erreur2, 1);
+			FenetreMere.affichePrintf(erreur2, 1);
 		}
 		
 		return phrase.length();

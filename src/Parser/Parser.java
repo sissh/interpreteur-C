@@ -12,7 +12,6 @@ public class Parser{
 
 	private HashMap<String, Variable> variables;
 	private ArrayList<Token> ligne;
-	public static String FIN_EXEC = "Fin d'exécution";
 
 	public Parser() {
 		variables = new HashMap<String, Variable>();
@@ -22,8 +21,6 @@ public class Parser{
 	public Object execution(ArrayList<Token> nvLigne, HashMap<String, Variable> nvVariables) {
 		variables= nvVariables;
 		ligne=nvLigne;
-		if (ligne.size()==0)
-			return FIN_EXEC;
 		if (ligne.get(0) instanceof Type) {
 			if (ligne.get(1) instanceof Variable) {
 				boolean ok = declareVariable((Variable)ligne.get(1));

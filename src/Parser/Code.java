@@ -28,6 +28,8 @@ public class Code implements ListeMots{
 	 */
 	public int indice;
 	
+	public static String FIN_EXEC = "Fin d'exécution";
+	
 	/**
 	 * Constructeur de la classe, initialise les variables.
 	 */
@@ -120,13 +122,18 @@ public class Code implements ListeMots{
 		}
 	}//makeTokens
 	
+	/**
+	 * Lance l'execution du {@linkplain Parser.Parser Parser}, gère la memoire, et traite les potentielles erreurs.
+	 * @param chaine La String, traitee par {@link Parser.Code#makeTokens(String) makeTokens}
+	 * @return HashMap des Variables, ou erreur String.
+	 */
 	@SuppressWarnings("unchecked")
-	public Object execLigne(String chaine){//solution potentielle : copier ce qui est à envoyer dans une variable, puis assigner dans tab
-		indice++;
-		arrayListRecord.add(arrayListRecord.get(indice-1));
+	public Object execLigne(String chaine){
+		indice++;//sera l'indice de l'etat de la memoire après l'execution de la fonction
+		arrayListRecord.add(arrayListRecord.get(indice-1));//copie de l'etat precedent de la memoire dans la nouvelle, avant modification
 		makeTokens(chaine);
 		if (0 == arrayListTokens.size())
-			return "Fin d'exécution";//Erreur si l'utilisateur appuie sur le bouton "ligne précédente" ?
+			return FIN_EXEC;
 		else {
 			if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
 				return "Ligne finie sans ';'";

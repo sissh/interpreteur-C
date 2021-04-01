@@ -132,25 +132,21 @@ public class Code implements ListeMots{
 		indice++;//sera l'indice de l'etat de la memoire après l'execution de la fonction
 		arrayListRecord.add(arrayListRecord.get(indice-1));//copie de l'etat precedent de la memoire dans la nouvelle, avant modification
 		makeTokens(chaine);
-		if (0 == arrayListTokens.size())
-			return FIN_EXEC;
-		else {
-			if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
-				return "Ligne finie sans ';'";
-			arrayListTokens.remove(arrayListTokens.size()-1);//suppression du token ';'
+		if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
+			return "Ligne finie sans ';'";
+		arrayListTokens.remove(arrayListTokens.size()-1);//suppression du token ';'
 			
-			HashMap<String, Variable> temp = new HashMap<String, Variable>();
-			temp.putAll(arrayListRecord.get(indice));
+		HashMap<String, Variable> temp = new HashMap<String, Variable>();
+		temp.putAll(arrayListRecord.get(indice));
 			
-			Object resultat = parser.execution(arrayListTokens, temp);
+		Object resultat = parser.execution(arrayListTokens, temp);
 
-			if (resultat instanceof HashMap<?, ?>) {
-				arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);
-				return (HashMap<String, Variable>)resultat;//variables à afficher dans la mémoire de l'interface
-			}
-			else 
-				return resultat.toString();// erreur à afficher dans la console de l'interface
+		if (resultat instanceof HashMap<?, ?>) {
+			arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);
+			return (HashMap<String, Variable>)resultat;//variables à afficher dans la mémoire de l'interface
 		}
+		else 
+			return resultat.toString();// erreur à afficher dans la console de l'interface
 	}
 	
 	public HashMap<String, Variable> backLine() {

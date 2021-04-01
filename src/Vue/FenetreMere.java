@@ -346,7 +346,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		 */
 		public void lectureLigne(String ligne) {
 		valeurRetour = codeObjet.execLigne(ligne) ;
-		if( valeurRetour instanceof String && valeurRetour != Parser.Code.FIN_EXEC) {
+		if( valeurRetour instanceof String && valeurRetour != Parser.Parser.FIN_EXEC) {
 			indiceLecture = 0 ;
 			ligneActive =  0;
 			iteration = 0 ;
@@ -357,7 +357,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			InterfaceC.setEditable(true);
 			BackExecute.setVisible(false);
 		}
-		else if(valeurRetour instanceof String && valeurRetour == Parser.Code.FIN_EXEC) {
+		else if(valeurRetour instanceof String && valeurRetour == Parser.Parser.FIN_EXEC) {
 			affichePrintf((String)valeurRetour , 0) ;
 			Execute.setVisible(false);
 		}

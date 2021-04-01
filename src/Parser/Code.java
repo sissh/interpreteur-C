@@ -132,10 +132,10 @@ public class Code implements ListeMots{
 		indice++;//sera l'indice de l'etat de la memoire après l'execution de la fonction
 		arrayListRecord.add(arrayListRecord.get(indice-1));//copie de l'etat precedent de la memoire dans la nouvelle, avant modification
 		makeTokens(chaine);
-		if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))
+		if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))//Ne doit pas arriver avec l'interface
 			return "Ligne finie sans ';'";
 		arrayListTokens.remove(arrayListTokens.size()-1);//suppression du token ';'
-			
+
 		HashMap<String, Variable> temp = new HashMap<String, Variable>();
 		temp.putAll(arrayListRecord.get(indice));
 			

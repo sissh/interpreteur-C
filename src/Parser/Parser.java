@@ -102,6 +102,7 @@ public class Parser{
 	
 	private Object execFonctions(int debut, int fin) {
 		int i=debut;
+		//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i);
 		while (i<fin) {
 			if (ligne.get(i) instanceof TokenFonction) {//faire calculLigne entre chaque virgule au lieu de gerer les cas particuliers
 				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1; //plus besoin donc de s'occuper des fonctions imbriquees
@@ -110,18 +111,20 @@ public class Parser{
 					ArrayList <Object> parametres = new ArrayList <Object>();
 					int j=0;
 					while (i+j<fin && !ligne.get(i+j).getNom().equals(")")) {//gestion des fonctions imbriquées : compter les parentheses
+						
 						while (i+j<fin && !ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")"))//erreur potentielle si pow(,5) par ex
 							j++;
-						
+						System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
 						if (i+j==fin)
 							return standardErrorMessage("paramètre", "rien");
 						else if (ligne.get(i+j).getNom().equals(",") || ligne.get(i+j).getNom().equals(")")) {//autres cas possibles ?
-							Object nvFin = calculLigne(i,j-1);//peut-être inutile
+							Object nvFin = calculLigne(i,i+j-1);//peut-être inutile
+							System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j+" nvFin : "+nvFin);
 							if (nvFin instanceof String)
 								return nvFin.toString();
 							else if ((int)nvFin!=i)
 								return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";
-							fin-=(j-i);
+							fin-=j;
 							parametres.add(getTokenValeur(ligne.get(i)));
 							ligne.remove(i);
 							if (ligne.get(i).getNom().equals(","))

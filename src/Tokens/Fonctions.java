@@ -86,7 +86,7 @@ public class Fonctions {
 		int nbTrigger = nbArgs;														//Compte le nb de % détectés par la fonction: on part du principe qu'il y en aura autant que d'args
 		
 
-		while (i < phrase.length()-1) {			//Parcours de la phrase: taille variable car elle est changée quand on trouve des %
+		while (i < phrase.length()-1 && nbArgs > 0) {			//Parcours de la phrase: taille variable car elle est changée quand on trouve des %; pas de parcours si pas d'arguments.
 			
 			if (phrase.charAt(i) == '%') {		//Détection d'un %
 				
@@ -122,18 +122,14 @@ public class Fonctions {
 //Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant et vérifiant le type de variable correspondant
 	private static boolean testVariable (char ch1, Object arg) { 
 			switch (ch1) {
-				case 'd' :
+				case 'd', 'c' :													//On vérifie si au caractère détecté, on a bien un type d'argument correspondant.
 					if (arg instanceof Integer) {return true;}
-					else; return false;
-				
+					else; return false;				
 				case 's':
 					if (arg instanceof String) {return true;}
 					else; return false;
-				case 'c':
-					if (arg instanceof Character) {return true;}
-					else; return false;
 				case 'f':
-					if (arg instanceof Float) {return true;}
+					if (arg instanceof Float || arg instanceof Double) {return true;}
 					else; return false;
 
 				default:return false;

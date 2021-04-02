@@ -56,7 +56,15 @@ public class Variable extends Token{
 	 * @param nvValeur Nouvelle valeur de la variable, 
 	 */
 	public void setValeur(Number nvValeur) {
-		this.valeur = nvValeur;
+		if (type.equals("int"))
+			valeur = nvValeur.intValue();
+		else if (type.equals("long"))
+			valeur = nvValeur.longValue();
+		else if (type.equals("float"))
+			valeur = nvValeur.floatValue();
+		else if (type.equals("double"))
+			valeur = nvValeur.doubleValue();
+		else System.out.println("### Erreur non attendue lors de l'assignation de valeur ###");
 	}
 	
 	/**

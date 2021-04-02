@@ -2,8 +2,6 @@ package Parser;
 
 import java.util.ArrayList;
 
-import Tokens.Token;
-
 /**
  * Classe de tests de l'algorithme, pour pouvoir cibler les éléments à tester
  * @author alexi

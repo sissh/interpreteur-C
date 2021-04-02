@@ -84,7 +84,7 @@ public class Parser{
 			return "Erreur lors de l'exécution";
 		
 		if (signe!=null)
-			ligne.set(0, calculArithmetique(getTokenValeur(variables.get(courant)),signe, getTokenValeur(ligne.get(0))));
+			ligne.set(0, calculArithmetique(variables.get(courant),signe, ligne.get(0)));
 		modifVariable(courant, ligne.get(0));
 		
 		Iterator<String> iterateur = calculSuffixe.keySet().iterator();
@@ -234,7 +234,7 @@ public class Parser{
 			else if (type.equals("double"))
 				variables.get(nomVariable).setValeur((double)variables.get(nomVariable).getValeur()+1);
 		}
-		else {
+		else {//return String erreur si aucun des deux ? est-ce que ça peut arriver ? à voir
 			if (type.equals("int"))
 				variables.get(nomVariable).setValeur((int)variables.get(nomVariable).getValeur()-1);
 			else if (type.equals("long"))
@@ -259,7 +259,7 @@ public class Parser{
 						continuer=true;//tant qu'il reste des tokens à exécuter, continuer
 						if (i+1<ligne.size()) {
 							if (ligne.get(i+1) instanceof Variable || ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
+								ligne.set(i-1, calculArithmetique(ligne.get(i-1),ligne.get(i),ligne.get(i+1)));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;							
 							}
 							else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
@@ -287,7 +287,7 @@ public class Parser{
 						continuer=true;//tant qu'il reste des tokens à exécuter, continuer
 						if (i+1<ligne.size()) {
 							if (ligne.get(i+1) instanceof Variable || ligne.get(i+1) instanceof Constante) {
-							ligne.set(i-1, calculArithmetique(getTokenValeur(ligne.get(i-1)),ligne.get(i),getTokenValeur(ligne.get(i+1))));
+							ligne.set(i-1, calculArithmetique(ligne.get(i-1),ligne.get(i),ligne.get(i+1)));
 							ligne.remove(i);ligne.remove(i); i=debut;fin-=2;							
 							}
 							else return standardErrorMessage("variable ou constante", ligne.get(i+1).getNom());
@@ -371,20 +371,13 @@ public class Parser{
 		variables.get(nomToken).setValeur(getTokenValeur(nvValeur));
 	}
 	
-	private Constante calculArithmetique(Number gauche, Token token, Number droite) {
-		int resultat = 0;
-		if (token.getNom().equals("+"))
-			resultat = (int)gauche+(int)droite;
-		else if (token.getNom().equals("-"))
-			resultat = (int)gauche-(int)droite;
-		else if (token.getNom().equals("*"))
-			resultat = (int)gauche*(int)droite;
-		else if (token.getNom().equals("/"))
-			resultat = (int)gauche/(int)droite;
-		else if (token.getNom().equals("%"))
-			resultat = (int)gauche % (int)droite;
-		else System.out.println("erreur");
-		return new Constante(resultat);//gestion erreurs
+	private Constante calculArithmetique(Token gauche, Token token, Token droite) {
+		Number numGauche=getTokenValeur(gauche);
+		Number numDroite=getTokenValeur(droite);
+		Number resultat;
+	    resultat = numGauche.doubleValue() + numDroite.doubleValue();//conversion ensuite en fonction du type à assigner
+		return new Constante(resultat);
+
 	}
 	
 	private Number getTokenValeur(Token token) {

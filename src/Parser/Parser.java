@@ -1,6 +1,8 @@
 package Parser;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+
 import Tokens.*;
 
 /**
@@ -29,7 +31,7 @@ public class Parser{
 				boolean ok = declareVariable((Variable)ligne.get(1));
 				if (!ok)
 					return "La variable "+ligne.get(1).getNom()+" a déjà été déclarée précédemment";
-				variables.get(ligne.get(1).getNom()).setType((Type)ligne.get(0));//assigne le type
+				variables.get(ligne.get(1).getNom()).setType(ligne.get(0).getNom());//assigne le type
 				ligne.remove(0);
 				if (ligne.size()==1){//si déclaration sans assignation de valeur
 					ligne.remove(0);
@@ -42,14 +44,11 @@ public class Parser{
 			if (!existe(ligne.get(0)))
 				return "Token "+ligne.get(0).getNom()+" non initialisé précédemment";
 		}
-		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;"
+		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;", voir si possible de faire "++a=5;"
 			String courant = ligne.get(1).getNom();
 			if (variables.get(courant).getValeur()==null)
 				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée";
-			if (ligne.get(0).getNom().equals("++"))
-				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
-			else 
-				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())-1);
+			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
 		else return "Début d'expression interdite";
@@ -61,10 +60,7 @@ public class Parser{
 		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
 			if (variables.get(courant).getValeur()==null)
 				return "Attention ! Ne jamais incrémenter une variable non instancée";
-			if (ligne.get(0).getNom().equals("++"))
-				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())+1);
-			else 
-				variables.get(courant).setValeur(((int)variables.get(courant).getValeur())-1);
+			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
 		else if (ligne.get(0) instanceof Operateur_1 || ligne.get(0) instanceof Operateur_2) {
@@ -79,7 +75,7 @@ public class Parser{
 		Object erreur=errorCalculUnaire();
 		if (erreur instanceof String)
 			return erreur.toString();
-		ArrayList<String> calculSuffixe= calculUnaireSuffixe();
+		HashMap<String,OpeUnaire> calculSuffixe= calculUnaireSuffixe();
 		calculUnairePrefixe();
 		erreur = initCalcul();
 		if (erreur instanceof String)
@@ -91,10 +87,11 @@ public class Parser{
 			ligne.set(0, calculArithmetique(getTokenValeur(variables.get(courant)),signe, getTokenValeur(ligne.get(0))));
 		modifVariable(courant, ligne.get(0));
 		
-		for (int j=0; j<calculSuffixe.size();j++ ) {
-			String nomamodifier = calculSuffixe.get(j);
-			variables.get(nomamodifier).setValeur(variables.get(nomamodifier).getValeur());
-			variables.get(nomamodifier).setValeur(((int)variables.get(nomamodifier).getValeur())+1);//incrémentation dans la mémoire
+		Iterator<String> iterateur = calculSuffixe.keySet().iterator();
+		String nomValeur;
+		while (iterateur.hasNext()) {
+			nomValeur=iterateur.next();
+			incrementation(nomValeur, calculSuffixe.get(nomValeur));
 		}
 		ligne.remove(0);//suppresion de la constante finale
 		return variables;
@@ -119,77 +116,45 @@ public class Parser{
 								nbParentheses--;
 							j++;
 						}
-						System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
+						//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
 						if (i+j==fin)
 							return standardErrorMessage("paramètre", "rien");
 						else if (ligne.get(i+j).getNom().equals(",") || ligne.get(i+j).getNom().equals(")")) {//autres cas possibles ?
 							Object nvFin = calculLigne(i,i+j-1);//peut-être inutile
-							System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j+" nvFin : "+nvFin);
+							//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j+" nvFin : "+nvFin);
 							if (nvFin instanceof String)
 								return nvFin.toString();
-							else if ((int)nvFin!=i)
-								return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";
-							fin-=j;
-							parametres.add(getTokenValeur(ligne.get(i)));
+							else if ((int)nvFin!=i) {
+								System.out.println("Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop");
+								//ici, envoi dans la fonction de la chaine de tokens
+								if (ligne.get(i).getNom().equals("\"")) {
+									ligne.remove(i);
+									String phrase="";
+									while (!ligne.get(i).getNom().equals("\"")) {
+										phrase+=ligne.get(i).getNom();
+										ligne.remove(i);
+									}
+									parametres.add(phrase);
+								}
+							}
+							else
+								parametres.add(getTokenValeur(ligne.get(i)));
 							ligne.remove(i);
+							fin-=j;
 							if (ligne.get(i).getNom().equals(","))
 								ligne.remove(i);
 							else
 								fin--;
 							j=0;
 						}
-						/*if (ligne.get(i) instanceof Variable) {
-							parametres.add(getTokenValeur(ligne.get(i)));
-							ligne.remove(i); fin-=1;
-							if (i==ligne.size())
-								return standardErrorMessage(")", "rien");
-							else if (ligne.get(i).getNom().equals(",")) {
-								ligne.remove(i); fin-=1;}
-							else if(!ligne.get(i).getNom().equals(")"))
-								return standardErrorMessage(")", ligne.get(i).getNom());
-						}
-						else if (ligne.get(i) instanceof Constante) {
-							parametres.add(((Constante)ligne.get(i)).getValeur());
-							ligne.remove(i); fin-=1;
-							if (i==ligne.size())
-								return standardErrorMessage(")", "rien");
-							else if (ligne.get(i).getNom().equals(",")) {
-								ligne.remove(i); fin-=1;}
-							else if(!ligne.get(i).getNom().equals(")"))
-								return standardErrorMessage(")", ligne.get(i).getNom());
-						}
-						else if (ligne.get(i) instanceof TokenFonction) {//gestion des fonctions imbriquées
-							int gauche=0, droite=0, indice=i+1;
-							do {
-								if (ligne.get(indice).getNom().equals("("))
-									gauche++;
-								else if (ligne.get(indice).getNom().equals(")"))
-									droite++;
-								indice++;
-							}while (droite<gauche && indice<ligne.size());
-							Object error = execFonctions(i,indice);
-							fin-=indice-1;//-1 parce que décalage d'un au-dessus, c'est le nombre de tokens que j'ai supprimé, permet à la fonction appelante de ne pas subir le décalage( index out of range si fin supérieur à ligne.size() )
-							parametres.add(((Constante)ligne.get(i)).getValeur());//erreur : ajout sans vérification (,), rajouter conditions
-							ligne.remove(i); fin-=1;
-							if (error instanceof String)
-								return error;
-							else if (i==ligne.size())
-								return standardErrorMessage(")", "rien");
-							else if (ligne.get(i).getNom().equals(",")) {
-								ligne.remove(i); fin-=1;}
-							else if(!ligne.get(i).getNom().equals(")"))
-								return standardErrorMessage(")", ligne.get(i).getNom());
-						}
-						else return standardErrorMessage("paramètre", ligne.get(i).getNom());*/
-						
 					}
-					System.out.println(ligne+" fin : "+fin+" i : "+i);
+					//System.out.println(ligne+" fin : "+fin+" i : "+i);
 					if (i==fin && !ligne.get(i).getNom().equals(")"))
 						return standardErrorMessage("paramètre' ou ')", "rien");
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
 					if (resultat instanceof String)
 						return resultat.toString();
-					ligne.set(i, new Constante(resultat));// à la place du Token ')'
+					ligne.set(i, new Constante((Number)resultat));// à la place du Token ')'
 					
 				}
 				else return standardErrorMessage("(", ligne.get(i).getNom());
@@ -199,19 +164,32 @@ public class Parser{
 		return fin;
 	}
 	
-	private ArrayList<String> calculUnaireSuffixe(){
-		ArrayList<String> variablesAIncrementer = new ArrayList<String>();
+	private HashMap<String, OpeUnaire> calculUnaireSuffixe(){
+		HashMap<String, OpeUnaire> variablesAIncrementer = new HashMap<String, OpeUnaire>();
 		int i=0;
 		while (i<ligne.size()) {
 			if (ligne.get(i++) instanceof Variable) {
 				if (i<ligne.size() && ligne.get(i) instanceof OpeUnaire) {
+					variablesAIncrementer.put(ligne.get(i-1).getNom(), (OpeUnaire)ligne.get(i));
 					ligne.remove(i);
-					variablesAIncrementer.add(ligne.get(i-1).getNom());
 				}
 				else i++;
 			}
 		}
 		return variablesAIncrementer;
+	}
+	
+	private void calculUnairePrefixe(){
+		int i=0;
+		while (i<ligne.size()) {
+			if (ligne.get(i++) instanceof OpeUnaire) {
+				if (i<ligne.size() && ligne.get(i) instanceof Variable) {					
+					incrementation(ligne.get(i).getNom(), (OpeUnaire)ligne.get(i-1));
+					ligne.remove(i-1);
+				}
+				else i++;
+			}
+		}
 	}
 	
 	private Object errorCalculUnaire() {//si tentative d'incrémenter constantes
@@ -244,16 +222,27 @@ public class Parser{
 		return null;
 	}
 	
-	private void calculUnairePrefixe(){
-		int i=0;
-		while (i<ligne.size()) {
-			if (ligne.get(i++) instanceof OpeUnaire) {
-				if (i<ligne.size() && ligne.get(i) instanceof Variable) {					
-					variables.get(ligne.get(i).getNom()).setValeur(((Variable)ligne.get(i)).getValeur());//incrémentation dans la mémoire
-					ligne.remove(i-1);
-				}
-				else i++;
-			}
+	private void incrementation(String nomVariable, OpeUnaire ope) {
+		String type=variables.get(nomVariable).getType();
+		if (ope.getNom().equals("++")) {
+			if (type.equals("int"))
+				variables.get(nomVariable).setValeur((int)variables.get(nomVariable).getValeur()+1);
+			else if (type.equals("long"))
+				variables.get(nomVariable).setValeur((long)variables.get(nomVariable).getValeur()+1);
+			else if (type.equals("float"))
+				variables.get(nomVariable).setValeur((float)variables.get(nomVariable).getValeur()+1);
+			else if (type.equals("double"))
+				variables.get(nomVariable).setValeur((double)variables.get(nomVariable).getValeur()+1);
+		}
+		else {
+			if (type.equals("int"))
+				variables.get(nomVariable).setValeur((int)variables.get(nomVariable).getValeur()-1);
+			else if (type.equals("long"))
+				variables.get(nomVariable).setValeur((long)variables.get(nomVariable).getValeur()-1);
+			else if (type.equals("float"))
+				variables.get(nomVariable).setValeur((float)variables.get(nomVariable).getValeur()-1);
+			else if (type.equals("double"))
+				variables.get(nomVariable).setValeur((double)variables.get(nomVariable).getValeur()-1);
 		}
 	}
 	
@@ -326,9 +315,9 @@ public class Parser{
 	}
 	
 	private Object initCalcul() {
-		Object erreur = verifNullVariables(); 
-		if (erreur instanceof String)
-			return erreur.toString();
+		Object erreur = verifNullVariables(); //à corriger, car peut creer des erreurs si non utilise
+		//if (erreur instanceof String)
+			//return erreur.toString();
 		int i =0;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
@@ -379,14 +368,10 @@ public class Parser{
 	}
 	
 	private void modifVariable(String nomToken, Token nvValeur) {//modifie la variable dans la mémoire. Si pas d'erreur, return "", si la variable n'existe pas, si est d'un autre type, erreur
-		
-		if (nvValeur instanceof Constante)
-			variables.get(nomToken).setValeur(((Constante) nvValeur).getValeur());
-		else
-			variables.get(nomToken).setValeur(getTokenValeur(nvValeur));
+		variables.get(nomToken).setValeur(getTokenValeur(nvValeur));
 	}
 	
-	private Constante calculArithmetique(Object gauche, Token token, Object droite) {
+	private Constante calculArithmetique(Number gauche, Token token, Number droite) {
 		int resultat = 0;
 		if (token.getNom().equals("+"))
 			resultat = (int)gauche+(int)droite;
@@ -402,11 +387,9 @@ public class Parser{
 		return new Constante(resultat);//gestion erreurs
 	}
 	
-	private Object getTokenValeur(Token token) {
-		if (token instanceof Variable) {
-			try{return variables.get(token.getNom()).getValeur();}
-			catch(Exception e) {return null;}
-		}
+	private Number getTokenValeur(Token token) {
+		if (token instanceof Variable)
+			return variables.get(token.getNom()).getValeur();
 		return ((Constante)token).getValeur();
 	}
 

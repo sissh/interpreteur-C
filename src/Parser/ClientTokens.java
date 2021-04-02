@@ -15,10 +15,14 @@ public class ClientTokens {
 	 * @param args Arguments du main, non utilisé 
 	 */
 	public static void main(String []args) {
-		
 		Code code = new Code();
 		ArrayList<String> test = new ArrayList<String>();
-		test.add("int a=pow(pow(2,2),pow(2,pow(1,1)));");
+		test.add("double a=5.5;");
+		test.add("int b=a+2;");
+		//test.add("a;");
+		//test.add("int b=pow(2,pow(2,1*1)*2);");
+		//test.add("int c=a*pow(b,1*1);");
+		//test.add("int b=printf(\"%d\",a);");
 		/*test.add("int b=a*5;");
 		test.add("a=b%14;");
 		test.add("a=a+2*(3*2);");
@@ -31,6 +35,7 @@ public class ClientTokens {
 			System.out.println(erreur);
 			if (erreur instanceof String) break;
 		}
+		System.out.println(code.getRecord().get(0).get("a").getValeur().getClass());
 		/*System.out.println("record  :"+code.getRecord());
 		code.backLine();
 		System.out.println("record  :"+code.getRecord());

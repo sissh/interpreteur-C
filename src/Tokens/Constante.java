@@ -9,27 +9,33 @@ import Parser.ListeMots;
  *
  */
 public class Constante extends Token{
-	private Object valeur;
+	private Number valeur;
+	private String type;
 	
 	/**
 	 * Constructeur de la classe
 	 * @param nvValeur La valeur de la constante (plus tart, gérer char et char[])
 	 */
-	public Constante(Object nvValeur) {
+	public Constante(Number nvValeur) {
 		/**
 		 * nom de Token stéréotypé, car sans intérêt (inusité)
 		 * Facile à repérer lors de la maintenance (affichage d'une ligne en cours d'exécution par exemple)
 		 */
 		super(ListeMots.CONSTANTE);
 		this.valeur=nvValeur;
+		this.type=nvValeur.getClass().toString();
 	}
 	
 	/**
 	 * Récupère la valeur de la variable
 	 * @return La valeur de la variable, de type int, char, ...
 	 */
-	public Object getValeur() {
+	public Number getValeur() {
 		return this.valeur;
+	}
+	
+	public String getType() {
+		return this.type;
 	}
 	
 	public String toString() {

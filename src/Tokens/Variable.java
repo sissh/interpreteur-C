@@ -12,11 +12,11 @@ public class Variable extends Token{
 	/**
 	 * La variable a un type
 	 */
-	private Token type;
+	private String type;
 	/**
 	 * La variable a une valeur, de type int, char, int[],...
 	 */
-	private Object valeur;
+	private Number valeur;
 	
 	/**
 	 * 
@@ -26,16 +26,20 @@ public class Variable extends Token{
 	 * @see Parser.Code {@link Parser.Code#differentiation(String nom) differentiation} 
 	 * @see Parser.Code En fin de fonction {@link Parser.Code#makeTokens(String) makeTokens}, conversion en TokenFonction possible
 	 */
-	public Variable(String nvNom,Object nvValeur) {//
+	public Variable(String nvNom,Number nvValeur) {//
 		super(nvNom);
 		this.valeur=nvValeur;
+		if (nvValeur==null)
+				this.type=null;
+		else
+			this.type=nvValeur.getClass().toString();
 	}
 	
 	/**
 	 * 
 	 * @return Le type de la variable
 	 */
-	public Token getType() {
+	public String getType() {
 		return this.type;
 	}
 	
@@ -43,7 +47,7 @@ public class Variable extends Token{
 	 * 
 	 * @return La valeur de la variable
 	 */
-	public Object getValeur() {
+	public Number getValeur() {
 		return this.valeur;
 	}
 	
@@ -51,15 +55,23 @@ public class Variable extends Token{
 	 * 
 	 * @param nvValeur Nouvelle valeur de la variable, 
 	 */
-	public void setValeur(Object nvValeur) {
-		this.valeur = nvValeur;
+	public void setValeur(Number nvValeur) {
+		if (type.equals("int"))
+			valeur = nvValeur.intValue();
+		else if (type.equals("long"))
+			valeur = nvValeur.longValue();
+		else if (type.equals("float"))
+			valeur = nvValeur.floatValue();
+		else if (type.equals("double"))
+			valeur = nvValeur.doubleValue();
+		else System.out.println("### Erreur non attendue lors de l'assignation de valeur ###");
 	}
 	
 	/**
 	 * 
 	 * @param nvType Nouveau type de la variable
 	 */
-	public void setType(Type nvType) {
+	public void setType(String nvType) {
 		this.type=nvType;
 	}
 	

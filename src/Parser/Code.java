@@ -96,16 +96,16 @@ public class Code implements ListeMots{
 			if (arrayListTokens.get(i).getNom().equals(""))
 				arrayListTokens.remove(i);
 			else if (arrayListTokens.get(i).getNom().equals("+")) {// rajouter + et + juxtaposé, opérateur unaire
-				if (arrayListTokens.get(i-1).getNom().equals("+")) {
+				if (arrayListTokens.get(i+1).getNom().equals("+")) {
 					arrayListTokens.remove(i);
-					arrayListTokens.set(i-1, new OpeUnaire("++"));
+					arrayListTokens.set(i, new OpeUnaire("++"));
 				}
 				else i++;
 					
 			}
 			else if (arrayListTokens.get(i).getNom().equals("-")) {//idem pour --
-				if (arrayListTokens.get(i+2).getNom().equals("-")) {
-					arrayListTokens.remove(i+2);
+				if (arrayListTokens.get(i+1).getNom().equals("-")) {
+					arrayListTokens.remove(i);
 					arrayListTokens.set(i, new OpeUnaire("--"));
 				}
 				else i++;
@@ -135,27 +135,26 @@ public class Code implements ListeMots{
 		if (0 == arrayListTokens.size() || !arrayListTokens.get(arrayListTokens.size()-1).getNom().equals(";"))//Ne doit pas arriver avec l'interface
 			return "Ligne finie sans ';'";
 		arrayListTokens.remove(arrayListTokens.size()-1);//suppression du token ';'
-
-		HashMap<String, Variable> temp = new HashMap<String, Variable>();
-		temp.putAll(arrayListRecord.get(indice));
-			
-		Object resultat = parser.execution(arrayListTokens, temp);
-
+		
+		Object resultat = parser.execution(arrayListTokens, arrayListRecord.get(indice));//on donne ici l'etat de la memoire à modifier
 		if (resultat instanceof HashMap<?, ?>) {
-			arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);
+			//arrayListRecord.set(indice,(HashMap<String, Variable>)resultat);
 			return (HashMap<String, Variable>)resultat;//variables à afficher dans la mémoire de l'interface
 		}
 		else 
 			return resultat.toString();// erreur à afficher dans la console de l'interface
 	}
 	
+	/**
+	 * Retrograde l'etat de la memoire
+	 * @return Etat precedent de la memoire
+	 */
 	public HashMap<String, Variable> backLine() {
 		arrayListRecord.remove(indice--);
 		return arrayListRecord.get(indice);
 	}
 	
-	@Override
-	public boolean isToken(char token) {
+	private boolean isToken(char token) {
 		
 		if (isOperateur_1(token))
 			return true;
@@ -175,30 +174,24 @@ public class Code implements ListeMots{
 			return true;
 		return false;
 	}//isToken
-
-	@Override
-	public boolean isToken(String token) {
-		return isType(token);
-	}
 	
-	public boolean isInt(String str) {
-		 
-        if (str == null || str.length() == 0) {
-            return false;
-        }
- 
-        try {
-            Integer.parseInt(str);
-            return true;
- 
-        } catch (NumberFormatException e) {
-            return false;
-        }
- 
-    }
+	private Object isNumeric(String str) {
+		try {
+			return Integer.parseInt(str);
+		}catch(Exception e) {};
+		try {
+			return Long.parseLong(str);
+		}catch(Exception e) {};
+		try {
+			return Float.parseFloat(str);
+		}catch(Exception e) {};
+		try { 
+			return Double.parseDouble(str);
+		}catch(Exception e) {};
+		return null;
+	}
 
-	@Override
-	public boolean isType(String token) {
+	private boolean isType(String token) {
 		for (int i=0; i< TYPES.length ; i++) {
 			if (token.equals(TYPES[i])) {
 				return true;
@@ -207,8 +200,7 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	@Override
-	public boolean isOperateur_1(char token) {
+	private boolean isOperateur_1(char token) {
 		for (int i=0; i< OPERATEURS_1.length ; i++) {
 			if (token == OPERATEURS_1[i]) {
 				return true;
@@ -217,8 +209,7 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
-	@Override
-	public boolean isOperateur_2(char token) {
+	private boolean isOperateur_2(char token) {
 		for (int i=0; i< OPERATEURS_2.length ; i++) {
 			if (token == OPERATEURS_2[i]) {
 				return true;
@@ -227,8 +218,7 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
-	@Override
-	public boolean isOpeUnaire(String token) {
+	private boolean isOpeUnaire(String token) {
 		for (int i=0; i< OPE_UNAIRE.length ; i++) {
 			if (token == OPE_UNAIRE[i]) {
 				return true;
@@ -237,8 +227,7 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
-	@Override
-	public boolean isSyntaxe(char token) {
+	private boolean isSyntaxe(char token) {
 		for (int i=0; i< SYNTAXE.length ; i++) {
 			if (token == SYNTAXE[i]) {
 				return true;
@@ -247,8 +236,7 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	@Override
-	public boolean isComparateur(char token) {
+	private boolean isComparateur(char token) {
 		for (int i=0; i< COMPARATEUR.length ; i++) {
 			if (token == COMPARATEUR[i]) {
 				return true;
@@ -257,21 +245,18 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	@Override
-	public boolean isEgal(char token) {
+	private boolean isEgal(char token) {
 		if (token == EGAL)
 			return true;
 		return false;
 	}
 	
-	@Override
-	public Token createToken(String nom) {
+	private Token createToken(String nom) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public Token createToken(char nom) {
+	private Token createToken(char nom) {
 		if (isOperateur_1(nom))
 			return new Operateur_1(String.valueOf(nom));
 		else if (isOperateur_2(nom))
@@ -286,29 +271,26 @@ public class Code implements ListeMots{
 			return null;
 	}
 
-	@Override
-	public Constante createToken(Object valeur) {
+	private Constante createToken(Number valeur) {
 		return new Constante(valeur);
 		
 	}
 
-	@Override
-	public Variable createToken(String nom, Object valeur) {
+	private Variable createToken(String nom, Number valeur) {
 		return new Variable(nom,valeur);
 		
 	}
 
-	@Override
-	public Token differentiation(String nom) {
-		if (isInt(nom))
-			return createToken(Integer.parseInt(nom));
+	private Token differentiation(String nom) {
+		Object result=isNumeric(nom);
+		if (result!=null)
+			return createToken((Number)result);
 		else if (isType(nom))
 			return new Type(nom);
 		else return createToken(nom,null);//variable sans valeur
 	}
 
-	@Override
-	public Token differentiation(char nom) {
+	private Token differentiation(char nom) {
 		return createToken(nom);
 	}
 	

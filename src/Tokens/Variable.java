@@ -64,6 +64,13 @@ public class Variable extends Token{
 			valeur = nvValeur.floatValue();
 		else if (type.equals("double"))
 			valeur = nvValeur.doubleValue();
+		else if (type.equals("char")) {
+			valeur=nvValeur.intValue()%256;
+			if (valeur.intValue()<-128)
+				valeur=valeur.intValue()+256;
+			else if (valeur.intValue()>127)
+				valeur=valeur.intValue()-256;
+		}
 		else System.out.println("### Erreur non attendue lors de l'assignation de valeur ###");
 	}
 	

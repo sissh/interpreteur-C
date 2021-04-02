@@ -214,36 +214,21 @@ public class Parser{
 		return null;
 	}
 	
-	private String verifNullVariables() {
+	private Object verifNullVariables() {
 		for (int i=0; i<ligne.size(); i++) {
-			if (ligne.get(i) instanceof Variable && getTokenValeur(ligne.get(i))==null)
-				return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant.";
-		}
+			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i)))
+				return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant.";}
 		return null;
 	}
 	
 	private void incrementation(String nomVariable, OpeUnaire ope) {
 		String type=variables.get(nomVariable).getType();
-		if (ope.getNom().equals("++")) {
-			if (type.equals("int"))
-				variables.get(nomVariable).setValeur((int)variables.get(nomVariable).getValeur()+1);
-			else if (type.equals("long"))
-				variables.get(nomVariable).setValeur((long)variables.get(nomVariable).getValeur()+1);
-			else if (type.equals("float"))
-				variables.get(nomVariable).setValeur((float)variables.get(nomVariable).getValeur()+1);
-			else if (type.equals("double"))
-				variables.get(nomVariable).setValeur((double)variables.get(nomVariable).getValeur()+1);
-		}
-		else {//return String erreur si aucun des deux ? est-ce que ça peut arriver ? à voir
-			if (type.equals("int"))
-				variables.get(nomVariable).setValeur((int)variables.get(nomVariable).getValeur()-1);
-			else if (type.equals("long"))
-				variables.get(nomVariable).setValeur((long)variables.get(nomVariable).getValeur()-1);
-			else if (type.equals("float"))
-				variables.get(nomVariable).setValeur((float)variables.get(nomVariable).getValeur()-1);
-			else if (type.equals("double"))
-				variables.get(nomVariable).setValeur((double)variables.get(nomVariable).getValeur()-1);
-		}
+		int plusmoins;
+		if (ope.getNom().equals("++"))
+			plusmoins=1;
+		else
+			plusmoins=1;
+		variables.get(nomVariable).setValeur(variables.get(nomVariable).getValeur().doubleValue()+plusmoins);
 	}
 	
 	private Object calculLigne1(int debut, int fin) {//calcul des multiplications, divisions, modulo
@@ -316,8 +301,8 @@ public class Parser{
 	
 	private Object initCalcul() {
 		Object erreur = verifNullVariables(); //à corriger, car peut creer des erreurs si non utilise
-		//if (erreur instanceof String)
-			//return erreur.toString();
+		if (erreur instanceof String)
+			return erreur.toString();
 		int i =0;
 		while (i<ligne.size()) {
 			if (ligne.get(i).getNom().equals("(")) {
@@ -359,6 +344,15 @@ public class Parser{
 	private boolean existe(Token token) {//si la variable (avec son type) n'existe pas dans la mémoire, false, sinon true
 		return variables.containsKey(token.getNom());
 	}
+	
+	private boolean estInstancie(Token token) {
+		if (existe(token)) {
+			if (variables.get(token.getNom()).getValeur()==null)
+				return false;
+			return true;
+		}
+		return false;
+	}
 
 	private boolean declareVariable(Variable token) {//ajoute dans la mémoire la variable. Si pas d'erreur, return "", si la variable existe déjà, erreur
 		if (variables.containsKey(token.getNom()))
@@ -375,9 +369,56 @@ public class Parser{
 		Number numGauche=getTokenValeur(gauche);
 		Number numDroite=getTokenValeur(droite);
 		Number resultat;
-	    resultat = numGauche.doubleValue() + numDroite.doubleValue();//conversion ensuite en fonction du type à assigner
+		if (token.getNom().equals("+")) {
+			if (numGauche instanceof Double || numDroite instanceof Double)
+				resultat = numGauche.doubleValue() + numDroite.doubleValue();
+			else if (numGauche instanceof Float || numDroite instanceof Float)
+				resultat = numGauche.floatValue() + numDroite.floatValue();
+			else if (numGauche instanceof Long || numDroite instanceof Long)
+				resultat = numGauche.longValue() + numDroite.longValue();
+			else
+				resultat = numGauche.intValue() + numDroite.intValue();
+		}
+		else if (token.getNom().equals("-")) {
+			if (numGauche instanceof Double || numDroite instanceof Double)
+				resultat = numGauche.doubleValue() - numDroite.doubleValue();
+			else if (numGauche instanceof Float || numDroite instanceof Float)
+				resultat = numGauche.floatValue() - numDroite.floatValue();
+			else if (numGauche instanceof Long || numDroite instanceof Long)
+				resultat = numGauche.longValue() - numDroite.longValue();
+			else
+				resultat = numGauche.intValue() - numDroite.intValue();
+		}
+		else if (token.getNom().equals("*")) {
+			if (numGauche instanceof Double || numDroite instanceof Double)
+				resultat = numGauche.doubleValue() * numDroite.doubleValue();
+			else if (numGauche instanceof Float || numDroite instanceof Float)
+				resultat = numGauche.floatValue() * numDroite.floatValue();
+			else if (numGauche instanceof Long || numDroite instanceof Long)
+				resultat = numGauche.longValue() * numDroite.longValue();
+			else
+				resultat = numGauche.intValue() * numDroite.intValue();
+		}
+		else if (token.getNom().equals("/")) {
+			if (numGauche instanceof Double || numDroite instanceof Double)
+				resultat = numGauche.doubleValue() / numDroite.doubleValue();
+			else if (numGauche instanceof Float || numDroite instanceof Float)
+				resultat = numGauche.floatValue() / numDroite.floatValue();
+			else if (numGauche instanceof Long || numDroite instanceof Long)
+				resultat = numGauche.longValue() / numDroite.longValue();
+			else
+				resultat = numGauche.intValue() / numDroite.intValue();
+		}
+		else{//%
+			if (numGauche instanceof Long || numDroite instanceof Long)
+				resultat = numGauche.longValue() % numDroite.longValue();
+			else if (numGauche instanceof Integer || numDroite instanceof Integer)
+				resultat = numGauche.intValue() % numDroite.intValue();
+			else
+				resultat=null;//il n'est pas possible d'utiliser % avec float ou double, à faire : gestion d'erreur
+		}
+		
 		return new Constante(resultat);
-
 	}
 	
 	private Number getTokenValeur(Token token) {

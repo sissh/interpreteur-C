@@ -80,22 +80,26 @@ public class Fonctions {
 		String phrase = arguments[0].toString();								//La fonction travail avec des String, pour la méthode subString()
 		String erreur1 = "Erreur : trop d'appel d'arguments.";								//Gestion d'erreur à l'interieur de print :
 		String erreur2 = "Erreur : trop d'arguments en paramètre.";									//Impossible pour execFonction de savoir s'il y a trop ou pas assez de %
+		String erreur3 = "Erreur : L'appel d'argument ne correspond pas au type en paramètre.";
 		int argCourant = 1;
 		int i = 0;
 		int nbArgs = arguments.length - 1;										//Compte le nb d'arguments
 		int nbTrigger = nbArgs;														//Compte le nb de % détectés par la fonction: on part du principe qu'il y en aura autant que d'args
 		
-
 		while (i < phrase.length()-1 && nbArgs > 0) {			//Parcours de la phrase: taille variable car elle est changée quand on trouve des %; pas de parcours si pas d'arguments.
 			
 			if (phrase.charAt(i) == '%') {		//Détection d'un %
 				
-				if (i < phrase.length() - 1 && testVariable(phrase.charAt(i+1), arguments[argCourant])) {		//Vérifie si le charactère qui suit % fait parti de ceux appelant un argument
+				if (i < phrase.length() - 1 && testVariable(phrase.charAt(i+1), arguments[argCourant])==0) {		//Vérifie si le charactère qui suit % fait parti de ceux appelant un argument
 					if (nbTrigger > 0) {
 						phrase = phrase.substring(0, i) + arguments[argCourant].toString() + phrase.substring(i+2);	//Découpe du String :
 						argCourant += 1;									//On coupe jusqu'à avant le %, on concatène l'argument puis le reste de la phrase
 					}
 					nbTrigger--;	//Passe à la variable suivante; ajoute 1 au décompte de % trouvé. 			
+				}
+				
+				else if (i < phrase.length() - 1 && testVariable(phrase.charAt(i+1), arguments[argCourant])==1) {
+					FenetreMere.affichePrintf(erreur3, 1);
 				}
 				
 			}
@@ -120,19 +124,19 @@ public class Fonctions {
 	}
 
 //Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant et vérifiant le type de variable correspondant
-	private static boolean testVariable (char ch1, Object arg) { 
+	private static int testVariable (char ch1, Object arg) { 
 			switch (ch1) {
 				case 'd', 'c' :													//On vérifie si au caractère détecté, on a bien un type d'argument correspondant.
-					if (arg instanceof Integer) {return true;}
-					else; return false;				
+					if (arg instanceof Integer) {return 0;}
+					else; return 1;				
 				case 's':
-					if (arg instanceof String) {return true;}
-					else; return false;
+					if (arg instanceof String) {return 0;}
+					else; return 1;
 				case 'f':
-					if (arg instanceof Float || arg instanceof Double) {return true;}
-					else; return false;
+					if (arg instanceof Float || arg instanceof Double) {return 0;}
+					else; return 1;
 
-				default:return false;
+				default:return 2;
 			}
 	}
 	

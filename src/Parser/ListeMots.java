@@ -1,7 +1,4 @@
 package Parser;
-import Tokens.Constante;
-import Tokens.Token;
-import Tokens.Variable;
 
 /**
  * Interface pratique si l'on veut modifier ce que doit contenir un Token.
@@ -11,12 +8,14 @@ import Tokens.Variable;
  */
 public interface ListeMots {
 
-	final String[] TYPES = {"char", "int", "long", "float", "double", "void"};
+	final char[] COMPARATEUR = {'!','<','>'};
+	final String CONSTANTE = "#CONST#";
+	final char EGAL = '=';
 	final char[] OPERATEURS_1 = {'/','*', '%'};
 	final char[] OPERATEURS_2 = {'+','-'};
 	final String[] OPE_UNAIRE= {"++","--"};
-	final char[] SYNTAXE = {'(',')','{','}','[',']',';',',','"','\''};
-	final char[] COMPARATEUR = {'!','<','>'};
-	final char EGAL = '=';
-	final String CONSTANTE = "#CONST#";
+	final char[] SYNTAXE = {'(',')','{','}','[',']',';',',','"','\'','&'};
+	final String[] TYPES = {"char", "int", "long", "float", "double", "void"};
+	
+	
 }

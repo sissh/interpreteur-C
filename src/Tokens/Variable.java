@@ -48,6 +48,10 @@ public class Variable extends Token{
 		return this.valeur;
 	}
 	
+	public Object getValeurAffichage() {
+		return this.getValeur();
+	}
+	
 	/**
 	 * 
 	 * @param nvValeur Nouvelle valeur de la variable, 

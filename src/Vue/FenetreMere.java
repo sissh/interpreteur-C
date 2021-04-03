@@ -370,7 +370,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			valeur[0] = nextIndice() ;
 			valeur[1] = i ;
 			valeur[2] = valeurLecture.get(i).getType() ;
-			valeur[3] = String.valueOf(valeurLecture.get(i).getValeur()) ;
+			valeur[3] = String.valueOf(valeurLecture.get(i).getValeurAffichage()) ;
 			ajoutTable(valeur) ;
 			}
 		}

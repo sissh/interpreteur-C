@@ -24,9 +24,13 @@ public class Pointeur extends Variable{
 		return this.destination;
 	}
 	
+	public String getValeurAffichage() {
+		return this.toString();
+	}
+	
 	public String toString() {
 		if (destination!=null)
-			return "p -> "+destination.toString();
+			return "p -> "+destination.getNom();
 		return "p -> ";
 	}
 }

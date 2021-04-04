@@ -1,8 +1,5 @@
 package Tokens;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 /**
  * Ce Token est une variable dans le code. Exemple : dans "int a=5;", a est une constante
  * @author alexi
@@ -12,7 +9,7 @@ public class Variable extends Token{
 	/**
 	 * La variable a un type
 	 */
-	private String type;
+	protected String type;
 	/**
 	 * La variable a une valeur, de type int, char, int[],...
 	 */
@@ -49,6 +46,10 @@ public class Variable extends Token{
 	 */
 	public Number getValeur() {
 		return this.valeur;
+	}
+	
+	public Object getValeurAffichage() {
+		return this.getValeur();
 	}
 	
 	/**

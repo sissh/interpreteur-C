@@ -1,21 +1,36 @@
 package Tokens;
 
-public class Pointeur {
+public class Pointeur extends Variable{
 	
-	Object destination;
+	private Variable destination;
 	
-	Pointeur(){
+	public Pointeur(String nvNom, String nvType){
+		super(nvNom,null);
 		destination=null;
+		type=nvType;
+		
 	}
-	Pointeur(Object nvDest){
+	public Pointeur(String nvNom, Variable nvDest, String nvType){
+		super(nvNom, null);
 		destination=nvDest;
+		type=nvType;
 	}
 	
-	public Object getDestination() {
+	public void setDestination(Variable nvDestination) {
+		destination=nvDestination;
+	}
+	
+	public Variable getDestination() {
 		return this.destination;
 	}
 	
+	public String getValeurAffichage() {
+		return this.toString();
+	}
+	
 	public String toString() {
-		return "p -> "+destination.toString();
+		if (destination!=null)
+			return "p -> "+destination.getNom();
+		return "p -> ";
 	}
 }

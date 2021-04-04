@@ -218,15 +218,6 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
-	private boolean isOpeUnaire(String token) {
-		for (int i=0; i< OPE_UNAIRE.length ; i++) {
-			if (token == OPE_UNAIRE[i]) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	private boolean isSyntaxe(char token) {
 		for (int i=0; i< SYNTAXE.length ; i++) {
 			if (token == SYNTAXE[i]) {
@@ -249,11 +240,6 @@ public class Code implements ListeMots{
 		if (token == EGAL)
 			return true;
 		return false;
-	}
-	
-	private Token createToken(String nom) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private Token createToken(char nom) {

@@ -26,7 +26,7 @@ public class Parser{
 		ligne=nvLigne;
 		if (ligne.size()==0)
 			return FIN_EXEC;
-		if (ligne.get(0) instanceof Type) {
+		if (ligne.get(0) instanceof Type && ligne.size()>1) {
 			if (ligne.get(1) instanceof Variable) {
 				boolean ok = declareVariable((Variable)ligne.get(1));
 				if (!ok)
@@ -37,6 +37,38 @@ public class Parser{
 					ligne.remove(0);
 					return variables;
 				}
+			}
+			else if (ligne.get(1).getNom().equals("*") && (ligne.size()==3 || ligne.size()==5 || ligne.size()==6)) {
+				if (ligne.get(2) instanceof Variable) {
+					ligne.set(2, new Pointeur(ligne.get(2).getNom(), ligne.get(0).getNom()+"*"));
+					boolean ok = declareVariable((Pointeur)ligne.get(2));
+					if (!ok)
+						return "La variable "+ligne.get(1).getNom()+" a déjà été déclarée précédemment";
+					//variables.get(ligne.get(2).getNom()).setType(ligne.get(0).getNom()+"*");
+					String courant = ligne.get(2).getNom();
+					ligne.remove(0);ligne.remove(0);ligne.remove(0);
+					if (ligne.size()==0)
+						return variables;
+					else if (ligne.get(0) instanceof Egal) {
+						ligne.remove(0);
+						if (ligne.get(0).getNom().equals("&") && ligne.size()==2) {
+							ligne.remove(0);
+							((Pointeur)variables.get(courant)).setDestination(variables.get(ligne.get(0).getNom()));
+							ligne.remove(0);
+						}
+						else if (variables.get(ligne.get(0).getNom()) instanceof Pointeur && ligne.size()==1) {
+							
+							((Pointeur)variables.get(courant)).setDestination(((Pointeur)variables.get(ligne.get(0).getNom())).getDestination());
+									
+							//((Pointeur)variables.get(courant)).setDestination(((Pointeur)ligne.get(0)).getDestination());
+							ligne.remove(0);
+						}
+						else return "Mauvaise déclaration de pointeur.";
+						return variables;
+					}
+					else return standardErrorMessage("=", ligne.get(0).getNom());
+				}
+				else return standardErrorMessage("variable", ligne.get(1).getNom());
 			}
 			else return "Variable attendue après une déclaration de type";
 		}

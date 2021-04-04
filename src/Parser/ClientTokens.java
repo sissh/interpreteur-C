@@ -15,9 +15,9 @@ public class ClientTokens {
 	public static void main(String []args) {
 		Code code = new Code();
 		ArrayList<String> test = new ArrayList<String>();
-		test.add("int a=15/pow(2,pow(2,1));");
-		test.add("int b=a%5;");
-		test.add("int c=a+b;");
+		test.add("int b=5;");
+		test.add("int * a = &b;");
+		test.add("int*c=a;");
 		for (int i=0;i<test.size();i++) {
 			Object erreur =code.execLigne(test.get(i));
 			System.out.println(erreur);

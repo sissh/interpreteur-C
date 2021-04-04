@@ -254,12 +254,11 @@ public class Parser{
 	}
 	
 	private void incrementation(String nomVariable, OpeUnaire ope) {
-		String type=variables.get(nomVariable).getType();
 		int plusmoins;
 		if (ope.getNom().equals("++"))
 			plusmoins=1;
 		else
-			plusmoins=1;
+			plusmoins=-1;
 		variables.get(nomVariable).setValeur(variables.get(nomVariable).getValeur().doubleValue()+plusmoins);
 	}
 	

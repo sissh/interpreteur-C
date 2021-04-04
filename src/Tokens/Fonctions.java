@@ -2,8 +2,6 @@ package Tokens;
 
 import java.util.ArrayList;
 
-import com.sun.net.httpserver.Filter.Chain;
-
 import Vue.FenetreMere;
 
 public class Fonctions {

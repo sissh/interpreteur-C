@@ -1,4 +1,4 @@
-package Tokens;
+package Parser;
 
 import java.util.ArrayList;
 
@@ -40,6 +40,11 @@ public class Fonctions {
 				
 			case "printf":
 				return print(arguments);
+			
+			case "scanf":
+				if (arguments.length <= 1) {
+					return messageErreur(6);
+				}
 				
 			default: return messageErreur(42);			//Fonction non reconnue : ne devrait pas apparaître car non appelé par le parser
 		}
@@ -55,7 +60,7 @@ public class Fonctions {
 			case 3: return "Erreur : pas assez d'arguments.";
 			case 4: return "Erreur : trop d'arguments.";
 			case 5: return "Erreur : Aucun argument de type Int.";
-			
+			case 6: return "Erreur : Aucune addresse de variable en argument.";
 			
 			
 			case 42: return "Fonction non reconnue.";
@@ -107,28 +112,42 @@ public class Fonctions {
 			i++;
 		}
 		
-		if (nbTrigger == 0) {							//Si il y a bien autant d'appel d'arguments que d'arguments, on renvoie le resultat
+		if (nbTrigger == 0) {							/**Si il y a bien autant d'appel d'arguments que d'arguments, on renvoie le resultat**/
 			FenetreMere.affichePrintf(phrase, 0);
 		}
 		
-		else if (nbTrigger < 0) {							//S'il y a plus d'appel d'arguments que d'arguments, on renvoi une erreur
+		else if (nbTrigger < 0) {							/**S'il y a plus d'appel d'arguments que d'arguments, on renvoi une erreur**/
 			FenetreMere.affichePrintf(erreur1, 1);
 		}
 		
-		else {													//S'il y a moins d'appel d'arguments que d'arguments, on renvoi une erreur
+		else {													/**S'il y a moins d'appel d'arguments que d'arguments, on renvoi une erreur**/
 			FenetreMere.affichePrintf(erreur2, 1);
 		}
 		
 		return phrase.length();
 		
 	}
+	
+	private static Object [] scanf(Object [] arguments) {
+		String phrase = arguments[0].toString();
+		Object [] resultat = null;
+		
+		
+		
+		
+		
+		return resultat;
+	}
 
 //Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant et vérifiant le type de variable correspondant
 	private static int testVariable (char ch1, Object arg) { 
 			switch (ch1) {
-				case 'd', 'c' :													//On vérifie si au caractère détecté, on a bien un type d'argument correspondant.
+				case 'd':													//On vérifie si au caractère détecté, on a bien un type d'argument correspondant.
 					if (arg instanceof Integer) {return 0;}
-					else; return 1;				
+					else; return 1;		
+				case 'c':
+					if (arg instanceof Integer) {return 0;}
+					else; return 1;		
 				case 's':
 					if (arg instanceof String) {return 0;}
 					else; return 1;

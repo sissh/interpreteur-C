@@ -49,6 +49,8 @@ public class Variable extends Token{
 	}
 	
 	public Object getValeurAffichage() {
+		if (type.equals("char"))
+			return getValeur().toString()+" ("+(char)getValeur().intValue()+")";
 		return this.getValeur();
 	}
 	
@@ -72,7 +74,7 @@ public class Variable extends Token{
 			else if (valeur.intValue()>127)
 				valeur=valeur.intValue()-256;
 		}
-		else System.out.println("### Erreur non attendue lors de l'assignation de valeur ###");
+		else System.err.println("### Erreur non attendue lors de l'assignation de valeur, problème au niveau du Parser ###");
 	}
 	
 	/**

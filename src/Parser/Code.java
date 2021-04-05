@@ -89,11 +89,28 @@ public class Code implements ListeMots{
 				parse="";
 				continue;
 				}
+			else if(chr=='\'') {
+				String temp=""+chr;
+				chr = chaine.charAt(++i);
+				temp+=chr;
+				chr=chaine.charAt(++i);
+				temp+=chr;
+				if (chr=='\'') {
+					if (!parse.equals("") && !parse.equals(" ")) {
+						arrayListTokens.add(differentiation(parse));
+					}
+					arrayListTokens.add(caractereToNum(temp.charAt(1)));
+					parse="";
+				}
+				else
+					parse+=temp;
+				chr=' ';
+			}
 			parse+=chr;
 		}
 		int i=0;
 		while (i<arrayListTokens.size()) {//Supprime des tokens vides en trop (ne doit plus arriver normalement, tester et supprimer si ok)
-			if (arrayListTokens.get(i).getNom().equals(""))
+			if (arrayListTokens.get(i).getNom().equals("") || arrayListTokens.get(i).getNom().equals(" "))
 				arrayListTokens.remove(i);
 			else if (arrayListTokens.get(i).getNom().equals("+")) {// rajouter + et + juxtaposé, opérateur unaire
 				if (arrayListTokens.get(i+1).getNom().equals("+")) {
@@ -165,11 +182,8 @@ public class Code implements ListeMots{
 				return true;
 			}
 		}
-		for (int i=0; i< COMPARATEUR.length ; i++) {
-			if (token == COMPARATEUR[i]) {
-				return true;
-			}
-		}
+		/*if (isComparateur(token))
+			return true;*/
 		if (isEgal(token))
 			return true;
 		return false;
@@ -227,14 +241,14 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	private boolean isComparateur(char token) {
+	/*private boolean isComparateur(char token) {
 		for (int i=0; i< COMPARATEUR.length ; i++) {
 			if (token == COMPARATEUR[i]) {
 				return true;
 			}
 		}
 		return false;
-	}
+	}*/
 
 	private boolean isEgal(char token) {
 		if (token == EGAL)
@@ -247,8 +261,8 @@ public class Code implements ListeMots{
 			return new Operateur_1(String.valueOf(nom));
 		else if (isOperateur_2(nom))
 			return new Operateur_2(String.valueOf(nom));
-		else if (isComparateur(nom))
-			return new Comparateur(String.valueOf(nom));
+		/*else if (isComparateur(nom))
+			return new Comparateur(String.valueOf(nom));*/
 		else if (isSyntaxe(nom))
 			return new Syntaxe(String.valueOf(nom));
 		else if (isEgal(nom))
@@ -278,6 +292,11 @@ public class Code implements ListeMots{
 
 	private Token differentiation(char nom) {
 		return createToken(nom);
+	}
+	
+	private Constante caractereToNum(char chr) {
+		int a = chr;
+		return new Constante(a);
 	}
 	
 	public ArrayList<Token> getTokens(){

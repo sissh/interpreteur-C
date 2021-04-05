@@ -8,14 +8,14 @@ package Parser;
  */
 public interface ListeMots {
 
-	final char[] COMPARATEUR = {'!','<','>'};
+	//final char[] COMPARATEUR = {'!','<','>'};
 	final String CONSTANTE = "#CONST#";
 	final char EGAL = '=';
 	final char[] OPERATEURS_1 = {'/','*', '%'};
 	final char[] OPERATEURS_2 = {'+','-'};
 	final String[] OPE_UNAIRE= {"++","--"};
-	final char[] SYNTAXE = {'(',')','{','}','[',']',';',',','"','&'};
-	final String[] TYPES = {"char", "int", "long", "float", "double", "void"};
+	final char[] SYNTAXE = {'(',')',/*'{','}','[',']',*/';',',','"','&'};
+	final String[] TYPES = {"char", "int", "long", "float", "double"/*, "void"*/};
 	
 	
 }

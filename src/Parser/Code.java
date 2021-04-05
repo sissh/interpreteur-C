@@ -182,11 +182,8 @@ public class Code implements ListeMots{
 				return true;
 			}
 		}
-		for (int i=0; i< COMPARATEUR.length ; i++) {
-			if (token == COMPARATEUR[i]) {
-				return true;
-			}
-		}
+		/*if (isComparateur(token))
+			return true;*/
 		if (isEgal(token))
 			return true;
 		return false;
@@ -244,14 +241,14 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	private boolean isComparateur(char token) {
+	/*private boolean isComparateur(char token) {
 		for (int i=0; i< COMPARATEUR.length ; i++) {
 			if (token == COMPARATEUR[i]) {
 				return true;
 			}
 		}
 		return false;
-	}
+	}*/
 
 	private boolean isEgal(char token) {
 		if (token == EGAL)
@@ -264,8 +261,8 @@ public class Code implements ListeMots{
 			return new Operateur_1(String.valueOf(nom));
 		else if (isOperateur_2(nom))
 			return new Operateur_2(String.valueOf(nom));
-		else if (isComparateur(nom))
-			return new Comparateur(String.valueOf(nom));
+		/*else if (isComparateur(nom))
+			return new Comparateur(String.valueOf(nom));*/
 		else if (isSyntaxe(nom))
 			return new Syntaxe(String.valueOf(nom));
 		else if (isEgal(nom))

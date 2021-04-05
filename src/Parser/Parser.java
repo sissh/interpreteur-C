@@ -53,14 +53,17 @@ public class Parser{
 						ligne.remove(0);
 						if (ligne.get(0).getNom().equals("&") && ligne.size()==2) {
 							ligne.remove(0);
-							((Pointeur)variables.get(courant)).setDestination(variables.get(ligne.get(0).getNom()));
-							ligne.remove(0);
+							if (variables.get(ligne.get(0).getNom()) instanceof Variable) {
+								if (!ajoutPointeur(courant,ligne.get(0).getNom()))
+									return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";
+								ligne.remove(0);
+							}
+							else
+								return "Tentative de placer un pointeur sur une variable non déclarée auparavant";
 						}
 						else if (variables.get(ligne.get(0).getNom()) instanceof Pointeur && ligne.size()==1) {
-							
-							((Pointeur)variables.get(courant)).setDestination(((Pointeur)variables.get(ligne.get(0).getNom())).getDestination());
-									
-							//((Pointeur)variables.get(courant)).setDestination(((Pointeur)ligne.get(0)).getDestination());
+							if (!ajoutPointeur(courant, ((Pointeur)variables.get(ligne.get(0).getNom())).getDestination().getNom()))
+								return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";
 							ligne.remove(0);
 						}
 						else return "Mauvaise déclaration de pointeur.";
@@ -79,7 +82,7 @@ public class Parser{
 		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;", voir si possible de faire "++a=5;"
 			String courant = ligne.get(1).getNom();
 			if (variables.get(courant).getValeur()==null)
-				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée";
+				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée auparavant "+ligne.get(1);
 			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
@@ -91,7 +94,7 @@ public class Parser{
 		Token signe =null;//pour assignation signée
 		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
 			if (variables.get(courant).getValeur()==null)
-				return "Attention ! Ne jamais incrémenter une variable non instancée";
+				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée auparavant "+ligne.get(0);
 			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
@@ -112,8 +115,28 @@ public class Parser{
 		erreur = initCalcul();
 		if (erreur instanceof String)
 			return erreur.toString();
-		if (ligne.size()!=1)
-			return "Erreur lors de l'exécution";
+		if (ligne.size()!=1) {
+			if (ligne.size()==2 && variables.get(courant) instanceof Pointeur && ligne.get(0).getNom().equals("&")) {//exemple : p=&a;, &a à la place de a / constante
+				ligne.remove(0);
+				if (variables.get(ligne.get(0).getNom()) instanceof Variable) {
+					if (!ajoutPointeur(courant,ligne.get(0).getNom())) {
+						return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";}
+					ligne.remove(0);
+				}
+				else
+					return "Tentative de placer un pointeur sur une variable non déclarée auparavant";
+			}
+			else
+				return "Erreur lors de l'exécution";
+			return variables;
+		}
+		else if (variables.get(ligne.get(0).getNom()) instanceof Pointeur) {
+			if (!ajoutPointeur(courant, ((Pointeur)variables.get(ligne.get(0).getNom())).getDestination().getNom()))
+				return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";
+			ligne.remove(0);
+			return variables;
+		}
+			
 		
 		if (signe!=null)
 			ligne.set(0, calculArithmetique(variables.get(courant),signe, ligne.get(0)));
@@ -157,7 +180,6 @@ public class Parser{
 							if (nvFin instanceof String)
 								return nvFin.toString();
 							else if ((int)nvFin!=i) {
-								System.out.println("Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop");
 								//ici, envoi dans la fonction de la chaine de tokens
 								if (ligne.get(i).getNom().equals("\"")) {
 									ligne.remove(i);
@@ -168,6 +190,24 @@ public class Parser{
 									}
 									parametres.add(phrase);
 								}
+								else if(ligne.get(i).getNom().equals("&")) {
+									ligne.remove(i);fin--;
+									if (ligne.get(i) instanceof Variable) {
+										parametres.add(variables.get(ligne.get(i).getNom()));
+									}
+									else
+										return "Il faut placer une variable après l'opérateur '&', vous avez mis : "+ligne.get(i);
+								}
+								else if (ligne.get(i).getNom().equals("*")) {
+									ligne.remove(i);fin--;
+									if (variables.get(ligne.get(i).getNom()) instanceof Pointeur) {
+										parametres.add(getTokenValeur(((Pointeur)variables.get(ligne.get(i).getNom())).getDestination()));
+									}
+									else
+										return "Il faut placer un pointeur après l'opérateur '*', vous avez mis : '"+ligne.get(i).getNom()+"', qui est de type : "+ligne.get(i).getClass();
+								}
+								else
+									return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";
 							}
 							else
 								parametres.add(getTokenValeur(ligne.get(i)));
@@ -248,8 +288,11 @@ public class Parser{
 	
 	private Object verifNullVariables() {
 		for (int i=0; i<ligne.size(); i++) {
-			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i)))
-				return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant.";}
+			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i))) {
+				if (!ligne.get(i-1).getNom().equals("%"))//ex : printf("%d",a);
+					return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant : "+ligne.get(i);
+			}
+		}
 		return null;
 	}
 	
@@ -378,7 +421,7 @@ public class Parser{
 	
 	private boolean estInstancie(Token token) {
 		if (existe(token)) {
-			if (variables.get(token.getNom()).getValeur()==null)
+			if (variables.get(token.getNom()).getValeur()==null && !(variables.get(token.getNom()) instanceof Pointeur && ((Pointeur)variables.get(token.getNom())).getDestination()!=null ))
 				return false;
 			return true;
 		}
@@ -450,6 +493,16 @@ public class Parser{
 		}
 		
 		return new Constante(resultat);
+	}
+	
+	private boolean ajoutPointeur(String pointeur, String destination) {
+		String typePointeur = variables.get(pointeur).getType().substring(0, variables.get(pointeur).getType().length()-1);
+		System.out.println(typePointeur);
+		System.out.println(variables.get(destination).getType());
+		if (!typePointeur.equals(variables.get(destination).getType()))
+			return false;
+		((Pointeur)variables.get(pointeur)).setDestination(variables.get(destination));
+		return true;
 	}
 	
 	private Number getTokenValeur(Token token) {

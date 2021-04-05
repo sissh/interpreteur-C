@@ -104,7 +104,7 @@ public class Code implements ListeMots{
 				}
 				else
 					parse+=temp;
-				chr=chaine.charAt(++i);
+				chr=' ';
 			}
 			parse+=chr;
 		}
@@ -137,7 +137,6 @@ public class Code implements ListeMots{
 			}
 			else i++;
 		}
-		System.out.println(arrayListTokens);
 	}//makeTokens
 	
 	/**

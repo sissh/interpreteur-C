@@ -89,11 +89,28 @@ public class Code implements ListeMots{
 				parse="";
 				continue;
 				}
+			else if(chr=='\'') {
+				String temp=""+chr;
+				chr = chaine.charAt(++i);
+				temp+=chr;
+				chr=chaine.charAt(++i);
+				temp+=chr;
+				if (chr=='\'') {
+					if (!parse.equals("") && !parse.equals(" ")) {
+						arrayListTokens.add(differentiation(parse));
+					}
+					arrayListTokens.add(caractereToNum(temp.charAt(1)));
+					parse="";
+				}
+				else
+					parse+=temp;
+				chr=chaine.charAt(++i);
+			}
 			parse+=chr;
 		}
 		int i=0;
 		while (i<arrayListTokens.size()) {//Supprime des tokens vides en trop (ne doit plus arriver normalement, tester et supprimer si ok)
-			if (arrayListTokens.get(i).getNom().equals(""))
+			if (arrayListTokens.get(i).getNom().equals("") || arrayListTokens.get(i).getNom().equals(" "))
 				arrayListTokens.remove(i);
 			else if (arrayListTokens.get(i).getNom().equals("+")) {// rajouter + et + juxtaposé, opérateur unaire
 				if (arrayListTokens.get(i+1).getNom().equals("+")) {
@@ -120,6 +137,7 @@ public class Code implements ListeMots{
 			}
 			else i++;
 		}
+		System.out.println(arrayListTokens);
 	}//makeTokens
 	
 	/**
@@ -278,6 +296,11 @@ public class Code implements ListeMots{
 
 	private Token differentiation(char nom) {
 		return createToken(nom);
+	}
+	
+	private Constante caractereToNum(char chr) {
+		int a = chr;
+		return new Constante(a);
 	}
 	
 	public ArrayList<Token> getTokens(){

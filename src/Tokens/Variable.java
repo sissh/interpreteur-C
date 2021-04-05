@@ -49,6 +49,8 @@ public class Variable extends Token{
 	}
 	
 	public Object getValeurAffichage() {
+		if (type.equals("char"))
+			return getValeur().toString()+" ("+(char)getValeur().intValue()+")";
 		return this.getValeur();
 	}
 	

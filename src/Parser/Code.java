@@ -298,9 +298,4 @@ public class Code implements ListeMots{
 		int a = chr;
 		return new Constante(a);
 	}
-	
-	public ArrayList<Token> getTokens(){
-		return this.arrayListTokens;
-	}
-	
 }

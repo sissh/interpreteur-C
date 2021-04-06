@@ -69,7 +69,8 @@ public class Parser{
 						else return "Mauvaise déclaration de pointeur.";
 						return variables;
 					}
-					else return standardErrorMessage("=", ligne.get(0).getNom());
+					else
+						return standardErrorMessage("=", ligne.get(0).getNom());
 				}
 				else return standardErrorMessage("variable", ligne.get(1).getNom());
 			}
@@ -78,6 +79,17 @@ public class Parser{
 		else if (ligne.get(0) instanceof Variable) {
 			if (!existe(ligne.get(0)))
 				return "Token "+ligne.get(0).getNom()+" non initialisé précédemment";
+		}
+		else if (ligne.get(0) instanceof TokenFonction) {
+			HashMap<String,OpeUnaire> calculSuffixe = calculUnaireSuffixe();
+			Object erreur = initCalcul();
+			if (erreur instanceof String)
+				return erreur.toString();
+			else if (ligne.size()!=1)
+				return "Erreur lors de l'exécution";
+			ligne.remove(0);
+			calculSuffixe(calculSuffixe);
+			return variables;
 		}
 		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;", voir si possible de faire "++a=5;"
 			String courant = ligne.get(1).getNom();
@@ -89,7 +101,6 @@ public class Parser{
 		else return "Début d'expression interdite";
 		String courant = ligne.get(0).getNom();
 		ligne.remove(0);
-		
 		
 		Token signe =null;//pour assignation signée
 		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
@@ -104,15 +115,11 @@ public class Parser{
 			ligne.remove(0);
 		}
 		else if (!(ligne.get(0) instanceof Egal))//gérer autres types d'assignation de valeur
-			return "Token "+ligne.get(0).getNom()+" inattendu, le programme devait trouver un \"=\"";
+			return standardErrorMessage("=", ligne.get(0).getNom());
 		ligne.remove(0);
 
-		Object erreur=errorCalculUnaire();
-		if (erreur instanceof String)
-			return erreur.toString();
-		HashMap<String,OpeUnaire> calculSuffixe= calculUnaireSuffixe();
-		calculUnairePrefixe();
-		erreur = initCalcul();
+		HashMap<String,OpeUnaire> calculSuffixe = calculUnaireSuffixe();
+		Object erreur = initCalcul();
 		if (erreur instanceof String)
 			return erreur.toString();
 		if (ligne.size()!=1) {
@@ -137,19 +144,22 @@ public class Parser{
 			return variables;
 		}
 			
-		
 		if (signe!=null)
 			ligne.set(0, calculArithmetique(variables.get(courant),signe, ligne.get(0)));
 		modifVariable(courant, ligne.get(0));
 		
+		calculSuffixe(calculSuffixe);
+		ligne.remove(0);//suppresion de la constante finale
+		return variables;
+	}
+	
+	private void calculSuffixe(HashMap<String,OpeUnaire> calculSuffixe) {
 		Iterator<String> iterateur = calculSuffixe.keySet().iterator();
 		String nomValeur;
 		while (iterateur.hasNext()) {
 			nomValeur=iterateur.next();
 			incrementation(nomValeur, calculSuffixe.get(nomValeur));
 		}
-		ligne.remove(0);//suppresion de la constante finale
-		return variables;
 	}
 	
 	private Object execFonctions(int debut, int fin) {
@@ -287,8 +297,11 @@ public class Parser{
 	}
 	
 	private Object verifNullVariables() {
+		boolean guillemets=false;
 		for (int i=0; i<ligne.size(); i++) {
-			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i))) {
+			if (ligne.get(i).getNom().equals("\""))
+				guillemets=!guillemets;//lèverait une erreur dans printf sinon. Il faudrait gérer ça dans makeTokens à l'avenir
+			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i)) && !guillemets) {
 				if (!ligne.get(i-1).getNom().equals("%"))//ex : printf("%d",a);
 					return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant : "+ligne.get(i);
 			}
@@ -374,7 +387,12 @@ public class Parser{
 	}
 	
 	private Object initCalcul() {
-		Object erreur = verifNullVariables(); //à corriger, car peut creer des erreurs si non utilise
+		Object erreur=errorCalculUnaire();
+		if (erreur instanceof String)
+			return erreur.toString();//
+		
+		calculUnairePrefixe();
+		erreur = verifNullVariables(); //à corriger, car peut creer des erreurs si non utilise
 		if (erreur instanceof String)
 			return erreur.toString();
 		int i =0;
@@ -383,7 +401,6 @@ public class Parser{
 				if (i==0 || !(ligne.get(i-1) instanceof TokenFonction)) {
 					ligne.remove(i);
 					erreur = calculParentheses(i);
-					//ici ajouter fonction (??)
 					if (erreur instanceof String)
 						return erreur.toString();
 					

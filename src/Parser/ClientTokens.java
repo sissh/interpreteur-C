@@ -15,13 +15,15 @@ public class ClientTokens {
 	public static void main(String []args) {
 		Code code = new Code();
 		ArrayList<String> test = new ArrayList<String>();
-		test.add("int a ;");
-		test.add("int * b=&a;");
+		test.add("int a =5;");
+		test.add("int* b =&a;");
+		test.add("pow((,2);");
+		/*test.add("int * b=&a;");
 		test.add("int * c=&a;");
 		test.add("int *d=c;");
 		test.add("int *e;");
 		test.add("e=c;");
-		test.add("int g=pow(2,2);");
+		test.add("int g=pow(2,2);");*/
 		//test.add("int d=pow(a, * b);");
 		
 		//test.add("int*c=a;");

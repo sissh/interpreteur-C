@@ -66,7 +66,7 @@ public class Parser{
 								return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";
 							ligne.remove(0);
 						}
-						else return "Mauvaise déclaration de pointeur.";
+						else return "Mauvaise déclaration de pointeur";
 						return variables;
 					}
 					else
@@ -78,7 +78,7 @@ public class Parser{
 		}
 		else if (ligne.get(0) instanceof Variable) {
 			if (!existe(ligne.get(0)))
-				return "Token "+ligne.get(0).getNom()+" non initialisé précédemment";
+				return "Variable "+ligne.get(0).getNom()+" non initialisée précédemment";
 		}
 		else if (ligne.get(0) instanceof TokenFonction) {
 			HashMap<String,OpeUnaire> calculSuffixe = calculUnaireSuffixe();
@@ -94,7 +94,7 @@ public class Parser{
 		else if (ligne.get(0) instanceof OpeUnaire && ligne.size()==2 && ligne.get(1) instanceof Variable){//ex : "++a;", voir si possible de faire "++a=5;"
 			String courant = ligne.get(1).getNom();
 			if (variables.get(courant).getValeur()==null)
-				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée auparavant "+ligne.get(1);
+				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instanciée auparavant : "+ligne.get(1);
 			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
@@ -105,7 +105,7 @@ public class Parser{
 		Token signe =null;//pour assignation signée
 		if (ligne.get(0) instanceof OpeUnaire && 1==ligne.size()){//ex : "a++;"
 			if (variables.get(courant).getValeur()==null)
-				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instancée auparavant "+ligne.get(0);
+				return "Attention ! Il est vivement conseillé de ne pas incrémenter une variable non instanciée auparavant : "+ligne.get(0);
 			incrementation(courant,(OpeUnaire)ligne.get(0));
 			return variables;
 		}
@@ -126,8 +126,8 @@ public class Parser{
 			if (ligne.size()==2 && variables.get(courant) instanceof Pointeur && ligne.get(0).getNom().equals("&")) {//exemple : p=&a;, &a à la place de a / constante
 				ligne.remove(0);
 				if (variables.get(ligne.get(0).getNom()) instanceof Variable) {
-					if (!ajoutPointeur(courant,ligne.get(0).getNom())) {
-						return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";}
+					if (!ajoutPointeur(courant,ligne.get(0).getNom()))
+						return "Il faut utiliser un pointeur correspondant au type de la variable correspondante";
 					ligne.remove(0);
 				}
 				else
@@ -203,7 +203,7 @@ public class Parser{
 										parametres.add(getTokenValeur(((Pointeur)variables.get(ligne.get(i).getNom())).getDestination()));
 									}
 									else
-										return "Il faut placer un pointeur après l'opérateur '*', vous avez mis : '"+ligne.get(i).getNom()+"', qui est de type : "+ligne.get(i).getClass();
+										return "Il faut placer un pointeur après l'opérateur '*', vous avez mis : '"+ligne.get(i).getNom();
 								}
 								else
 									return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";

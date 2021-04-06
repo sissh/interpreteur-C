@@ -106,6 +106,19 @@ public class Code implements ListeMots{
 					parse+=temp;
 				chr=' ';
 			}
+			else if (chr=='"') {
+				String temp=""+chr;
+				chr=' ';
+				do {
+					i++;
+					chr=chaine.charAt(i);
+					temp+=chr;
+				}while(i < chaine.length() && chr!='"');
+				arrayListTokens.add(differentiation(parse));
+				arrayListTokens.add(new Phrase(temp));
+				parse="";
+				chr=' ';
+			}
 			parse+=chr;
 		}
 		int i=0;

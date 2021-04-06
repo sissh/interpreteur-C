@@ -164,7 +164,6 @@ public class Parser{
 	
 	private Object execFonctions(int debut, int fin) {
 		int i=debut;
-		//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i);
 		while (i<fin) {
 			if (ligne.get(i) instanceof TokenFonction) {//faire calculLigne entre chaque virgule au lieu de gerer les cas particuliers
 				String nomFonction = ligne.get(i).getNom();ligne.remove(i); fin-=1; //plus besoin donc de s'occuper des fonctions imbriquees
@@ -181,26 +180,14 @@ public class Parser{
 								nbParentheses--;
 							j++;
 						}
-						//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j);
 						if (i+j==fin)
 							return standardErrorMessage("paramètre", "rien");
 						else if (ligne.get(i+j).getNom().equals(",") || ligne.get(i+j).getNom().equals(")")) {//autres cas possibles ?
-							Object nvFin = calculLigne(i,i+j-1);//peut-être inutile
-							//System.out.println(ligne+" debut :"+debut+" fin :"+fin+" i :"+i+" j : "+j+" nvFin : "+nvFin);
+							Object nvFin = calculLigne(i,i+j-1);
 							if (nvFin instanceof String)
 								return nvFin.toString();
 							else if ((int)nvFin!=i) {
-								//ici, envoi dans la fonction de la chaine de tokens
-								if (ligne.get(i).getNom().equals("\"")) {
-									ligne.remove(i);
-									String phrase="";
-									while (!ligne.get(i).getNom().equals("\"")) {
-										phrase+=ligne.get(i).getNom();
-										ligne.remove(i);
-									}
-									parametres.add(phrase);
-								}
-								else if(ligne.get(i).getNom().equals("&")) {
+								if(ligne.get(i).getNom().equals("&")) {
 									ligne.remove(i);fin--;
 									if (ligne.get(i) instanceof Variable) {
 										parametres.add(variables.get(ligne.get(i).getNom()));
@@ -219,6 +206,9 @@ public class Parser{
 								else
 									return "Vous avez oublié un paramètre dans la fonction "+nomFonction+", ou virgule en trop";
 							}
+							else if (ligne.get(i) instanceof Phrase) {
+								parametres.add(ligne.get(i).getNom());
+							}
 							else
 								parametres.add(getTokenValeur(ligne.get(i)));
 							ligne.remove(i);
@@ -230,7 +220,6 @@ public class Parser{
 							j=0;
 						}
 					}
-					//System.out.println(ligne+" fin : "+fin+" i : "+i);
 					if (i==fin && !ligne.get(i).getNom().equals(")"))
 						return standardErrorMessage("paramètre' ou ')", "rien");
 					Object resultat = Fonctions.execFonction(nomFonction, parametres);
@@ -297,11 +286,9 @@ public class Parser{
 	}
 	
 	private Object verifNullVariables() {
-		boolean guillemets=false;
 		for (int i=0; i<ligne.size(); i++) {
 			if (ligne.get(i).getNom().equals("\""))
-				guillemets=!guillemets;//lèverait une erreur dans printf sinon. Il faudrait gérer ça dans makeTokens à l'avenir
-			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i)) && !guillemets) {
+			if (ligne.get(i) instanceof Variable && !estInstancie(ligne.get(i))) {
 				if (!ligne.get(i-1).getNom().equals("%"))//ex : printf("%d",a);
 					return "Attention, il est vivement déconseillé d'utiliser une variable non instanciée auparavant : "+ligne.get(i);
 			}
@@ -514,8 +501,6 @@ public class Parser{
 	
 	private boolean ajoutPointeur(String pointeur, String destination) {
 		String typePointeur = variables.get(pointeur).getType().substring(0, variables.get(pointeur).getType().length()-1);
-		System.out.println(typePointeur);
-		System.out.println(variables.get(destination).getType());
 		if (!typePointeur.equals(variables.get(destination).getType()))
 			return false;
 		((Pointeur)variables.get(pointeur)).setDestination(variables.get(destination));

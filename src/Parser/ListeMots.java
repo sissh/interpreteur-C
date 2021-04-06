@@ -14,7 +14,7 @@ public interface ListeMots {
 	final char[] OPERATEURS_1 = {'/','*', '%'};
 	final char[] OPERATEURS_2 = {'+','-'};
 	final String[] OPE_UNAIRE= {"++","--"};
-	final char[] SYNTAXE = {'(',')',/*'{','}','[',']',*/';',',','"','&'};
+	final char[] SYNTAXE = {'(',')',/*'{','}','[',']',*/';',',','&'};
 	final String[] TYPES = {"char", "int", "long", "float", "double"/*, "void"*/};
 	
 	

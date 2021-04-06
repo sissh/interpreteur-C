@@ -128,16 +128,8 @@ public class Fonctions {
 		
 	}
 	
-	private static Object [] scanf(Object [] arguments) {
-		String phrase = arguments[0].toString();
-		Object [] resultat = null;
-		
-		
-		
-		
-		
-		return resultat;
-	}
+
+
 
 /**Méthode privée utilisée par print permettant de savoir si le caractère suivant % est bien un des % appelant et vérifiant le type de variable correspondant**/
 	private static int testVariable (char ch1, Object arg) { 

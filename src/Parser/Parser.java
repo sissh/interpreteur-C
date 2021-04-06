@@ -173,7 +173,7 @@ public class Parser{
 					int j=0;
 					while (i+j<fin && !ligne.get(i+j).getNom().equals(")")) {//gestion des fonctions imbriquées : compter les parentheses
 						int nbParentheses=0;
-						while (i+j<fin && (nbParentheses>0 || (!ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")")))){//erreur potentielle si pow(,5) par ex
+						while (i+j<fin && i+j<ligne.size() && (nbParentheses>0 || (!ligne.get(i+j).getNom().equals(",") && !ligne.get(i+j).getNom().equals(")")))){//erreur si parenthèses rajoutées au hasard
 							if (ligne.get(i+j).getNom().equals("("))
 								nbParentheses++;
 							else if (ligne.get(i+j).getNom().equals(")"))
@@ -182,6 +182,8 @@ public class Parser{
 						}
 						if (i+j==fin)
 							return standardErrorMessage("paramètre", "rien");
+						else if (i+j<ligne.size())
+							return "Token mal placé dans la fonction "+nomFonction;
 						else if (ligne.get(i+j).getNom().equals(",") || ligne.get(i+j).getNom().equals(")")) {//autres cas possibles ?
 							Object nvFin = calculLigne(i,i+j-1);
 							if (nvFin instanceof String)

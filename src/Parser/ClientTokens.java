@@ -15,9 +15,9 @@ public class ClientTokens {
 	public static void main(String []args) {
 		Code code = new Code();
 		ArrayList<String> test = new ArrayList<String>();
-		test.add("int a =5;");
-		test.add("int* b =&a;");
-		test.add("pow((,2);");
+		//test.add("int a =5;");
+		//test.add("int* b =&a;");
+		test.add("pow(2,2);");
 		/*test.add("int * b=&a;");
 		test.add("int * c=&a;");
 		test.add("int *d=c;");

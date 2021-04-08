@@ -148,7 +148,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 	
 	static String ERREUR = "\"Je pense donc je suis.\"" ;
 	
-	String testInterfaceC = "int a = 15 ;\n int b = 10 ;\nint c = 154 ;\n" ;
+	String testInterfaceC = "int a = 15 ;\nint b = 10 ;\nint c = 154 ;\n" ;
 	
 	
 	/**
@@ -309,7 +309,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 		}
 	}
-		indiceLecture = 0 ;	
+		indiceLecture = 0 ;
 	}
 	
 	/**
@@ -336,6 +336,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 		ligne += String.valueOf(text.charAt(indiceLecture)) ;
 		indiceLecture ++ ;
 		InterfaceC.getHighlighter().addHighlight(iteration, indiceLecture, couleurHighlight) ;
+
 		iteration = indiceLecture+1 ;
 		}
 		return ligne ;
@@ -378,11 +379,7 @@ public class FenetreMere extends JFrame implements ActionListener{
 			BackExecute.setVisible(false) ;
 		}
 		}	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * Méthode qui renvoie le nombre de ligne totale du code entré.
@@ -413,6 +410,10 @@ public class FenetreMere extends JFrame implements ActionListener{
 		else if(type == 1) {
 			ConsoleMemoire.afficheError(ConsoleMemoire.getConsole() , message);
 		}
+	}
+	
+	public String getScanF() {
+		return InputT.getText() ;
 	}
 
 	/**
@@ -445,7 +446,6 @@ public class FenetreMere extends JFrame implements ActionListener{
 					ligneActive ++ ;
 					lectureLigne(getLigne());
 					
-					System.out.println(ligneActive);
 				} catch (BadLocationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -456,29 +456,42 @@ public class FenetreMere extends JFrame implements ActionListener{
 			
 		}
 		else if(event.getActionCommand() == "backLigne") {
-			if(ligneActive > 1) {
+			if(ligneActive > 0) {
 				try {
 				ligneActive -= 1 ;
-				System.out.println(ligneActive);
+				if(ligneActive == 0) {
+					indiceLecture = 0 ;
+				}
+				else {
 				indiceLecture = refDebutLigne.get(ligneActive-1) ;
+				}
 				iteration = indiceLecture ;
 				codeObjet.backLine();
+				InterfaceC.getHighlighter().removeAllHighlights();
+				if(ligneActive != 0) {
 				getLigne();
+				}
+				else {
+					codeObjet.reset();
+					ConsoleMemoire.getMemory().setRowCount(1) ;
+					InterfaceC.getHighlighter().removeAllHighlights();
+					InterfaceC.setEditable(true);
+					BackExecute.setVisible(false);
+				}
 				ConsoleMemoire.getMemory().setRowCount(ConsoleMemoire.getMemory().getRowCount()-1);
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			}
-			else {
+		/*	else {
 				ConsoleMemoire.getMemory().setRowCount(ConsoleMemoire.getMemory().getRowCount()-1);
 				InterfaceC.getHighlighter().removeAllHighlights();
 				ligneActive -= 1 ;
-				System.out.println(ligneActive);
 				codeObjet.backLine();
 				iteration = indiceLecture ;
 				BackExecute.setVisible(false);
-			}
+			}*/
 
 			Execute.setVisible(true);
 		}
@@ -488,17 +501,17 @@ public class FenetreMere extends JFrame implements ActionListener{
 			ListeRepere();
 			}
 			InterfaceC.setEditable(false);
-			System.out.println(ligneActive);
 			if(ligneActive == 0) {
 				BackExecute.setVisible(false);
-					System.out.println("Caché");
 			}
 			else {
 				BackExecute.setVisible(true);
-				System.out.println("Visible");
 			}
 			try {
+
 				lectureLigne(getLigne());
+				
+				
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -536,4 +549,14 @@ public class FenetreMere extends JFrame implements ActionListener{
 		
 
 	}
+	
+	
+ private void debug(Object debug) {
+	 System.out.println(debug);
+ }
+	
+	
+	
+	
+	
 }

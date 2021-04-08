@@ -1,13 +1,13 @@
 package Tokens;
 
 /**
- * Ce Token est une variable dans le code. Exemple : dans "int a=5;", a est une constante
+ * Ce Token est une variable dans le code. Exemple : dans "int a=5;", a est une constante.
  * @author alexi
  *
  */
 public class Variable extends Token{
 	/**
-	 * La variable a un type
+	 * La variable a un type.
 	 */
 	protected String type;
 	/**
@@ -17,10 +17,10 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @param nvNom Le nom du Token
-	 * @param nvValeur Valeur à attribuer à la variable. Toujours fournis comme null : permet de distinguer les constructeurs
+	 * @param nvNom Le nom du Token.
+	 * @param nvValeur Valeur à attribuer à la variable. Toujours fournis comme null : permet de distinguer les constructeurs.
 	 * @see Parser.ListeMots
-	 * @see Parser.Code {@link Parser.Code#differentiation(String nom) differentiation} 
+	 * @see Parser.Code {@link Parser.Code#differentiation(String nom) differentiation}
 	 * @see Parser.Code En fin de fonction {@link Parser.Code#makeTokens(String) makeTokens}, conversion en TokenFonction possible
 	 */
 	public Variable(String nvNom,Number nvValeur) {//
@@ -34,7 +34,7 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @return Le type de la variable
+	 * @return Le type de la variable.
 	 */
 	public String getType() {
 		return this.type;
@@ -42,12 +42,18 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @return La valeur de la variable
+	 * @return La valeur de la variable.
 	 */
 	public Number getValeur() {
 		return this.valeur;
 	}
 	
+	/**
+	 * Fonction seevant à l'affichage pour l'interface.
+	 * Sert au polymorphisme.
+	 * @see Tokens.Pointeur
+	 * @return La valeur à afficher.
+	 */
 	public Object getValeurAffichage() {
 		if (type.equals("char"))
 			return getValeur().toString()+" ("+(char)getValeur().intValue()+")";
@@ -56,7 +62,7 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @param nvValeur Nouvelle valeur de la variable, 
+	 * @param nvValeur Nouvelle valeur de la variable. Conversion automatique de la valeur Java à celle limitée par la taille des variables en C (pas terminé).
 	 */
 	public void setValeur(Number nvValeur) {
 		if (type.equals("int"))
@@ -79,12 +85,15 @@ public class Variable extends Token{
 	
 	/**
 	 * 
-	 * @param nvType Nouveau type de la variable
+	 * @param nvType Nouveau type de la variable.
 	 */
 	public void setType(String nvType) {
 		this.type=nvType;
 	}
 	
+	/**
+	 * Sert au déboguage, pour obtenir plus d'informations sur une ligne.
+	 */
 	public String toString() {
 		return super.toString()+ " type : "+this.getType()+" valeur : "+this.getValeur();
 	}

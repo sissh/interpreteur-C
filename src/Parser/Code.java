@@ -5,7 +5,7 @@ import java.util.HashMap;
 import Tokens.*;
 
 /**
- * Classe préparant l'exécution du Parser, en créant les Tokens, et qui gère la sauvegarde de la mémoire
+ * Classe préparant l'exécution du Parser, en créant les Tokens, et qui gère la sauvegarde de la mémoire.
  * @author alexi
  *
  */
@@ -34,17 +34,28 @@ public class Code implements ListeMots{
 	 * Constructeur de la classe, initialise les variables.
 	 */
 	public Code() {
-		
-		arrayListTokens=new ArrayList<Token>();//contient les tokens à envoyer au Parser
-		parser = new Parser();//Parser pour l'exécution du code
-		arrayListRecord = new ArrayList<HashMap<String, Variable>>();//Enregistre les différents états de la mémoire
+		/**
+		 * contient les tokens à envoyer au Parser.
+		 */
+		arrayListTokens=new ArrayList<Token>();
+		/**
+		 * Parser pour l'exécution du code.
+		 */
+		parser = new Parser();
+		/**
+		 * Enregistre les différents états de la mémoire.
+		 */
+		arrayListRecord = new ArrayList<HashMap<String, Variable>>();
+		/**
+		 * initialise à zéro le prelier état de la mémoire.
+		 */
 		arrayListRecord.add(new HashMap<String, Variable>());
 		indice=0;
 	}
 	
 	/**
-	 * Utilisé pour de la maintenance de code, mais peut avoir son utilité dans l'interface (pour accéder à des états antérieurs de la mémoire).
-	 * @return
+	 * Utilisé pour de la maintenance de code, mais peut avoir son utilité dans l'interface (pour accéder à des états antérieurs de la mémoire sans retour arrière).
+	 * @return L'ensemble de la mémoire des variables, y compris les états antérieurs.
 	 */
 	public ArrayList<HashMap<String, Variable>> getRecord() {
 		return this.arrayListRecord;
@@ -63,8 +74,8 @@ public class Code implements ListeMots{
 	}
 	
 	/**
-	 * Conversion de la String envoyée par l'interface en une liste de Tokens (arrayListTokens)
-	 * @param chaine Texte converti
+	 * Conversion de la String envoyée par l'interface en une liste de Tokens (arrayListTokens).
+	 * @param chaine Texte converti.
 	 */
 	private void makeTokens(String chaine) {
 		String parse = "";//initialisation de cette variable, qui permet de distinguer les Tokens
@@ -154,7 +165,7 @@ public class Code implements ListeMots{
 	
 	/**
 	 * Lance l'execution du {@linkplain Parser.Parser Parser}, gère la memoire, et traite les potentielles erreurs.
-	 * @param chaine La String, traitee par {@link Parser.Code#makeTokens(String) makeTokens}
+	 * @param chaine La String, traitee par {@link Parser.Code#makeTokens(String) makeTokens}.
 	 * @return HashMap des Variables, ou erreur String.
 	 */
 	@SuppressWarnings("unchecked")
@@ -176,14 +187,19 @@ public class Code implements ListeMots{
 	}
 	
 	/**
-	 * Retrograde l'etat de la memoire
-	 * @return Etat precedent de la memoire
+	 * Retrograde l'etat de la memoire.
+	 * @return Etat precedent de la memoire.
 	 */
 	public HashMap<String, Variable> backLine() {
 		arrayListRecord.remove(indice--);
 		return arrayListRecord.get(indice);
 	}
 	
+	/**
+	 * Détermine si un caractère est un token stéréotypé.
+	 * @param token caractère de la chaine passées à {@link Parser.Code#makeTokens(String) makeTokens}.
+	 * @return true si oui, false sinon
+	 */
 	private boolean isToken(char token) {
 		
 		if (isOperateur_1(token))
@@ -195,14 +211,17 @@ public class Code implements ListeMots{
 				return true;
 			}
 		}
-		/*if (isComparateur(token))
-			return true;*/
 		if (isEgal(token))
 			return true;
 		return false;
 	}//isToken
 	
-	private Object isNumeric(String str) {
+	/**
+	 * Détermine si une chaine de caractères est identifiable à un nombre.
+	 * @param str Chaine de caractères à tester.
+	 * @return Le nombre en question, converti en le type correspondant.
+	 */
+	private Object isNumeric(String str) {//attention, la taille des variables n'est vraisemblablement pas la bonne. Cela se corrige dans la classe Tokens.Variable, suivre l'exemple de char
 		try {
 			return Integer.parseInt(str);
 		}catch(Exception e) {};
@@ -218,6 +237,11 @@ public class Code implements ListeMots{
 		return null;
 	}
 
+	/**
+	 * Détermine si une chaine de caractères est identifiable à un type de C.
+	 * @param token Chaine de caractère à tester.
+	 * @return true si oui, false sinon.
+	 */
 	private boolean isType(String token) {
 		for (int i=0; i< TYPES.length ; i++) {
 			if (token.equals(TYPES[i])) {
@@ -227,6 +251,11 @@ public class Code implements ListeMots{
 		return false;
 	}
 
+	/**
+	 * Détermine si une chaine de caractères est identifiable à '*', '/', ou '%'.
+	 * @param token Le caractère à tester.
+	 * @return true si oui, false sinon.
+	 */
 	private boolean isOperateur_1(char token) {
 		for (int i=0; i< OPERATEURS_1.length ; i++) {
 			if (token == OPERATEURS_1[i]) {
@@ -236,6 +265,11 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
+	/**
+	 * Détermine si une chaine de caractères est identifiable à '+', ou '-'.
+	 * @param token Le caractère à tester.
+	 * @return true si oui, false sinon.
+	 */
 	private boolean isOperateur_2(char token) {
 		for (int i=0; i< OPERATEURS_2.length ; i++) {
 			if (token == OPERATEURS_2[i]) {
@@ -245,6 +279,11 @@ public class Code implements ListeMots{
 		return false;
 	}
 	
+	/**
+	 * Détermine si une chaine de caractères est identifiable à un élément de syntaxe (quelconque, la classe {@link Tokens.Syntaxe Syntaxe} est un bouche trou) de C.
+	 * @param token Chaine de caractère à tester.
+	 * @return true si oui, false sinon.
+	 */
 	private boolean isSyntaxe(char token) {
 		for (int i=0; i< SYNTAXE.length ; i++) {
 			if (token == SYNTAXE[i]) {
@@ -254,21 +293,20 @@ public class Code implements ListeMots{
 		return false;
 	}
 
-	/*private boolean isComparateur(char token) {
-		for (int i=0; i< COMPARATEUR.length ; i++) {
-			if (token == COMPARATEUR[i]) {
-				return true;
-			}
-		}
-		return false;
-	}*/
-
+	/**
+	 * Détermine si une chaine de caractères est identifiable à '='.
+	 * @param token Caractère à tester.
+	 * @return true si oui, false sinon.
+	 */
 	private boolean isEgal(char token) {
-		if (token == EGAL)
-			return true;
-		return false;
+		return token == EGAL;
 	}
 
+	/**
+	 * Crée un token, en fonction du caractère récupéré.
+	 * @param nom Caractère à tester.
+	 * @return Le token créé.
+	 */
 	private Token createToken(char nom) {
 		if (isOperateur_1(nom))
 			return new Operateur_1(String.valueOf(nom));
@@ -284,16 +322,32 @@ public class Code implements ListeMots{
 			return null;
 	}
 
+	/**
+	 * Crée un token de type {@link Tokens.Constante Constante}.
+	 * @param valeur La valeur à attribuer à la constante.
+	 * @return Le token Constante nouvellement créé.
+	 */
 	private Constante createToken(Number valeur) {
 		return new Constante(valeur);
 		
 	}
 
+	/**
+	 * Crée un token de type {@link Tokens.Variable Variable}.
+	 * @param nom Le nom de la variable.
+	 * @param valeur La valeur de la variable (toujours utilisé à null pour le moment, mais peut-être amené à être modifié suivant la direction que prend l'équipe de programmation.
+	 * @return Le token Variable nouvellement créé.
+	 */
 	private Variable createToken(String nom, Number valeur) {
 		return new Variable(nom,valeur);
 		
 	}
 
+	/**
+	 * Choisi le constructeur de token à utiliser.
+	 * @param nom La chaine de caractère correspondant à la variable.
+	 * @return Le token nouvellement créé.
+	 */
 	private Token differentiation(String nom) {
 		Object result=isNumeric(nom);
 		if (result!=null)
@@ -303,10 +357,20 @@ public class Code implements ListeMots{
 		else return createToken(nom,null);//variable sans valeur
 	}
 
+	/**
+	 * Choisi le constructeur de token à utiliser. Inutile dans l'état actuel, car il n'y a qu'un constructeur pour caractère.
+	 * @param nom Le caractère correspondant à la variable.
+	 * @return Le token nouvellement créé.
+	 */
 	private Token differentiation(char nom) {
 		return createToken(nom);
 	}
 	
+	/**
+	 * Convertit un caractère entré par l'utilisateur ('A' par exemple) en son équivalent numérique.
+	 * @param chr Le caractère à convertir.
+	 * @return Le token de type {@link} Tokens.Constante Constante} associé.
+	 */
 	private Constante caractereToNum(char chr) {
 		int a = chr;
 		return new Constante(a);

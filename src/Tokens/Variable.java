@@ -2,9 +2,10 @@ package Tokens;
 
 /**
  * Ce Token est une variable dans le code. Exemple : dans "int a=5;", a est une constante.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Variable extends Token{
 	/**
 	 * La variable a un type.

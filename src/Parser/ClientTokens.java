@@ -4,9 +4,10 @@ import java.util.ArrayList;
 
 /**
  * Classe de tests de l'algorithme, pour pouvoir cibler les éléments à tester
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class ClientTokens {
 	/**
 	 * Main de tests

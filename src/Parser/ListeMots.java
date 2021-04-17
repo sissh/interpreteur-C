@@ -3,9 +3,10 @@ package Parser;
 /**
  * Interface pratique si l'on veut modifier ce que doit contenir un Token.
  * Les méthodes ne sont utiles que pour la Classe {@link Parser.Code Code} il serait d'ailleurs plus propre de les supprimer de l'interface (fonctions publiques qui ne devraient pas l'être)
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public interface ListeMots {
 
 	//final char[] COMPARATEUR = {'!','<','>'};

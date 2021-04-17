@@ -5,9 +5,10 @@ import Parser.ListeMots;
 /**
  * Ce Token est une contante dans le programme.
  * Exemple : dans "int a=5;", 5 est une constante.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Constante extends Token{
 	private Number valeur;
 	private String type;

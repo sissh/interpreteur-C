@@ -6,9 +6,10 @@ package Tokens;
  * Les Tokens particuliers n'ont parfois rien de plus que cette classe, mais cela permet de les identifier.
  * Les seuls Tokens qui méritaient une classe à part sont : TokenFonction, Variable, Constante.
  * Les autres sont génériques, on peut utiliser à la place les méthodes : {@link Parser.Code#isEgal(char) isEgal} {@link Parser.Code#isOperateur_1(char) isOperateur_1}, etc.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public abstract class Token {
 	/**
 	 * nom du Token, souvent identique à sa chaîne de caractère dans le code.

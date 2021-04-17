@@ -2,9 +2,10 @@ package Tokens;
 
 /**
  * Classe représentant un pointeur.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Pointeur extends Variable{
 	
 	/**

@@ -3,9 +3,10 @@ package Tokens;
 /**
  * Token Venant remplacer une chaine de caractères dans une ligne de code.
  * A remplacer plus tard toutefois par une classe générique pour tout type de tableaux.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Phrase extends Token{
 
 	/**

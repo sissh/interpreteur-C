@@ -7,9 +7,10 @@ import Tokens.*;
 
 /**
  * Classe d'exécution du code
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Parser{
 
 	/**

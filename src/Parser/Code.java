@@ -6,9 +6,10 @@ import Tokens.*;
 
 /**
  * Classe préparant l'exécution du Parser, en créant les Tokens, et qui gère la sauvegarde de la mémoire.
- * @author alexi
+ * @author Alexis Fondet
  *
  */
+//Pour plus d'informations, ou des conseils sur la continuation du projet : alexisfondet@gmail.com
 public class Code implements ListeMots{
 
 	/**
